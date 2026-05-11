@@ -1,0 +1,44 @@
+# ─── Secrets & env ───────────────────────────────────────────────
+.env
+.env.local
+.env.staging
+.env.production
+*.env
+
+# ─── Node ────────────────────────────────────────────────────────
+node_modules/
+e2e/node_modules/
+frontend/node_modules/
+
+# ─── Build outputs ───────────────────────────────────────────────
+frontend/dist/
+e2e/playwright-report/
+e2e/test-results/
+
+# ─── PHP / Composer ──────────────────────────────────────────────
+backend/vendor/
+backend/.phpunit.cache/
+backend/storage/logs/*.log
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/bootstrap/cache/*.php
+!backend/bootstrap/cache/.gitignore
+
+# ─── OS ───────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# ─── IDE ──────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.code-workspace
+
+# ─── Docker ───────────────────────────────────────────────────────
+# Les fichiers docker-compose.*.yml sont committés intentionnellement
+
+# ─── Logs ─────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
