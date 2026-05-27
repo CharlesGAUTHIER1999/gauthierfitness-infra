@@ -49,6 +49,16 @@ jobs:
       - name: Checkout infra
         uses: actions/checkout@v4
 
+      - name: Copier docker-compose + nginx vers VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.STAGING_SSH_HOST }}
+          username: ${{ secrets.STAGING_SSH_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          port: ${{ secrets.STAGING_SSH_PORT || '22' }}
+          source: "docker-compose.yml,nginx/"
+          target: "/var/www/gauthierfitness-staging/"
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
