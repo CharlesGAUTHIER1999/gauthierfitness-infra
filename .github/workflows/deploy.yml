@@ -7,6 +7,7 @@
 #    - Automatiquement via repository_dispatch depuis backend/frontend CI
 #
 #  Séquence : Deploy Staging → Tests E2E → Deploy Prod (gate manuelle)
+#  Ou      : Deploy Prod directement (prod-only)
 # ════════════════════════════════════════════════════════════════════
 
 name: Deploy Pipeline
@@ -24,7 +25,7 @@ on:
         required: true
         default: "staging"
         type: choice
-        options: [staging, both]
+        options: [staging, prod-only, both]
 
   # Déclenchement automatique depuis les CI backend/frontend
   repository_dispatch:
@@ -40,6 +41,10 @@ jobs:
   deploy-staging:
     name: "🚀 Déploiement Staging"
     runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'repository_dispatch' ||
+      github.event.inputs.environment == 'staging' ||
+      github.event.inputs.environment == 'both'
 
     environment:
       name: staging
@@ -96,13 +101,14 @@ jobs:
 
             echo "✅ Staging déployé — tag: $IMAGE_TAG — $(date)"
 
-# ──────────────────────────────────────────────────────────────────
-# JOB 2 — Tests E2E Playwright
-# ──────────────────────────────────────────────────────────────────
+  # ──────────────────────────────────────────────────────────────────
+  # JOB 2 — Tests E2E Playwright
+  # ──────────────────────────────────────────────────────────────────
   e2e:
     name: "🎭 Tests E2E Playwright"
     runs-on: ubuntu-latest
     needs: deploy-staging
+    if: needs.deploy-staging.result == 'success'
 
     steps:
       - name: Checkout
@@ -137,17 +143,27 @@ jobs:
           path: e2e/playwright-report/
           retention-days: 30
 
-# ──────────────────────────────────────────────────────────────────
-# JOB 3 — Déploiement Production (gate manuelle)
-# ──────────────────────────────────────────────────────────────────
+  # ──────────────────────────────────────────────────────────────────
+  # JOB 3 — Déploiement Production
+  # ──────────────────────────────────────────────────────────────────
   deploy-prod:
     name: "🏁 Déploiement Production OVH"
     runs-on: ubuntu-latest
-    needs: e2e
-    # Ne tourne que si demandé explicitement (both) ou sur main via dispatch
+    needs: [deploy-staging, e2e]
+    # prod-only : deploy direct sans passer par staging/e2e
+    # both      : deploy après e2e réussi
     if: |
-      github.event.inputs.environment == 'both' ||
-      github.event.client_payload.target == 'production'
+      always() &&
+      (
+        github.event.inputs.environment == 'prod-only' ||
+        (
+          (
+            github.event.inputs.environment == 'both' ||
+            github.event.client_payload.target == 'production'
+          ) &&
+          needs.e2e.result == 'success'
+        )
+      )
 
     environment:
       name: production
@@ -156,6 +172,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Copier fichiers vers VPS prod
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.PROD_SSH_HOST }}
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: ${{ secrets.PROD_SSH_PORT || '22' }}
+          source: "docker-compose.yml,docker-compose.prod.yml,nginx/"
+          target: "/var/www/gauthierfitness/"
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
