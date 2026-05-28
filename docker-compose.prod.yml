@@ -1,7 +1,7 @@
 # ════════════════════════════════════════════════════════════════════
 #  GauthierFitness — Production Override
 #  Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-#  ⚠  Variables sensibles via GitHub Secrets → injectées par le pipeline CI/CD
+#  ⚠  Ne pas redéfinir les images ici : docker-compose.yml a déjà les bons noms
 # ════════════════════════════════════════════════════════════════════
 
 services:
@@ -12,7 +12,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - /etc/letsencrypt:/etc/letsencrypt:ro  # certificats SSL OVH
+      - /etc/letsencrypt:/etc/letsencrypt:ro
       - backend_storage:/var/www/html/storage:ro
     restart: always
 
@@ -27,11 +27,11 @@ services:
     restart: always
 
   db:
-    ports: []                 # base non exposée en prod
+    ports: []
     restart: always
 
   redis:
-    ports: []                 # redis non exposé en prod
+    ports: []
     restart: always
 
   queue:
