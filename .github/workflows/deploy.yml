@@ -57,7 +57,7 @@ jobs:
       - name: Préparer la clé SSH
         run: |
           echo "${{ secrets.STAGING_SSH_KEY }}" | base64 -d > $RUNNER_TEMP/staging_key
-          chmod 600 $RUNNER_TEMP/staging_key
+          chmod 644 $RUNNER_TEMP/staging_key
 
       - name: Copier docker-compose + nginx vers VPS
         uses: appleboy/scp-action@v0.1.7
@@ -181,7 +181,7 @@ jobs:
       - name: Préparer la clé SSH
         run: |
           echo "${{ secrets.PROD_SSH_KEY }}" | base64 -d > $RUNNER_TEMP/prod_key
-          chmod 600 $RUNNER_TEMP/prod_key
+          chmod 644 $RUNNER_TEMP/prod_key
 
       - name: Copier fichiers vers VPS prod
         uses: appleboy/scp-action@v0.1.7
