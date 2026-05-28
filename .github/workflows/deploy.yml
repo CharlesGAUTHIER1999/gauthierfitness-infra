@@ -74,7 +74,7 @@ jobs:
         with:
           host: ${{ secrets.STAGING_SSH_HOST }}
           username: ${{ secrets.STAGING_SSH_USER }}
-          key_path: /github/runner_temp/staging_key
+          key_path: ${{ runner.temp }}/staging_key
           port: ${{ secrets.STAGING_SSH_PORT || 22 }}
           envs: IMAGE_TAG
           script: |
@@ -198,7 +198,7 @@ jobs:
         with:
           host: ${{ secrets.PROD_SSH_HOST }}
           username: ${{ secrets.PROD_SSH_USER }}
-          key_path: /github/runner_temp/prod_key
+          key_path: ${{ runner.temp }}/prod_key
           port: ${{ secrets.PROD_SSH_PORT || 22 }}
           envs: IMAGE_TAG
           script: |
