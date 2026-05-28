@@ -7,7 +7,6 @@
 #    - Automatiquement via repository_dispatch depuis backend/frontend CI
 #
 #  Séquence : Deploy Staging → Tests E2E → Deploy Prod (gate manuelle)
-#  Ou      : Deploy Prod directement (prod-only)
 # ════════════════════════════════════════════════════════════════════
 
 name: Deploy Pipeline
@@ -144,14 +143,14 @@ jobs:
           retention-days: 30
 
   # ──────────────────────────────────────────────────────────────────
-  # JOB 3 — Déploiement Production
+  # JOB 3 — Déploiement Production (gate manuelle)
   # ──────────────────────────────────────────────────────────────────
   deploy-prod:
     name: "🏁 Déploiement Production OVH"
     runs-on: ubuntu-latest
     needs: [deploy-staging, e2e]
-    # prod-only : deploy direct sans passer par staging/e2e
-    # both      : deploy après e2e réussi
+    # prod-only : déploiement direct sans staging ni E2E
+    # both      : staging → E2E → prod (E2E doit passer)
     if: |
       always() &&
       (
