@@ -56,15 +56,15 @@ jobs:
 
       - name: Préparer la clé SSH
         run: |
-          echo "${{ secrets.STAGING_SSH_KEY }}" | base64 -d > /tmp/staging_key
-          chmod 600 /tmp/staging_key
+          echo "${{ secrets.STAGING_SSH_KEY }}" | base64 -d > $RUNNER_TEMP/staging_key
+          chmod 600 $RUNNER_TEMP/staging_key
 
       - name: Copier docker-compose + nginx vers VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.STAGING_SSH_HOST }}
           username: ${{ secrets.STAGING_SSH_USER }}
-          key_path: /tmp/staging_key
+          key_path: /github/runner_temp/staging_key
           port: ${{ secrets.STAGING_SSH_PORT || '22' }}
           source: "docker-compose.yml,nginx/"
           target: "/var/www/gauthierfitness-staging/"
@@ -74,7 +74,7 @@ jobs:
         with:
           host: ${{ secrets.STAGING_SSH_HOST }}
           username: ${{ secrets.STAGING_SSH_USER }}
-          key_path: /tmp/staging_key
+          key_path: /github/runner_temp/staging_key
           port: ${{ secrets.STAGING_SSH_PORT || 22 }}
           envs: IMAGE_TAG
           script: |
@@ -180,15 +180,15 @@ jobs:
 
       - name: Préparer la clé SSH
         run: |
-          echo "${{ secrets.PROD_SSH_KEY }}" | base64 -d > /tmp/prod_key
-          chmod 600 /tmp/prod_key
+          echo "${{ secrets.PROD_SSH_KEY }}" | base64 -d > $RUNNER_TEMP/prod_key
+          chmod 600 $RUNNER_TEMP/prod_key
 
       - name: Copier fichiers vers VPS prod
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.PROD_SSH_HOST }}
           username: ${{ secrets.PROD_SSH_USER }}
-          key_path: /tmp/prod_key
+          key_path: /github/runner_temp/prod_key
           port: ${{ secrets.PROD_SSH_PORT || '22' }}
           source: "docker-compose.yml,docker-compose.prod.yml,nginx/"
           target: "/var/www/gauthierfitness/"
@@ -198,7 +198,7 @@ jobs:
         with:
           host: ${{ secrets.PROD_SSH_HOST }}
           username: ${{ secrets.PROD_SSH_USER }}
-          key_path: /tmp/prod_key
+          key_path: /github/runner_temp/prod_key
           port: ${{ secrets.PROD_SSH_PORT || 22 }}
           envs: IMAGE_TAG
           script: |
