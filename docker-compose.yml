@@ -65,8 +65,9 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD:-gauthier_password}
     volumes:
       - db_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
+    # ⚠ Pas de "ports:" ici — MySQL ne doit JAMAIS être exposé à internet.
+    # Le backend y accède via le réseau Docker interne (hostname "db").
+    # Pour un accès local ponctuel : tunnel SSH (ssh -L 3306:localhost:3306 ...).
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s

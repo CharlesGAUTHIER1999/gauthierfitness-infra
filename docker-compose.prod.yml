@@ -27,11 +27,9 @@ services:
     restart: always
 
   db:
-    ports: []
     restart: always
 
   redis:
-    ports: []
     restart: always
 
   queue:
