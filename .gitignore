@@ -12,8 +12,11 @@ frontend/node_modules/
 
 # ─── Build outputs ───────────────────────────────────────────────
 frontend/dist/
-e2e/playwright-report/
-e2e/test-results/
+
+# ─── Cypress artifacts ───────────────────────────────────────────
+e2e/cypress/screenshots/
+e2e/cypress/videos/
+e2e/cypress/downloads/
 
 # ─── PHP / Composer ──────────────────────────────────────────────
 backend/vendor/

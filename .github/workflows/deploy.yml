@@ -113,7 +113,7 @@ jobs:
   # JOB 2 — Tests E2E Playwright
   # ──────────────────────────────────────────────────────────────────
   e2e:
-    name: "🎭 Tests E2E Playwright"
+    name: "🌲 Tests E2E Cypress"
     runs-on: ubuntu-latest
     needs: deploy-staging
     if: needs.deploy-staging.result == 'success'
@@ -129,26 +129,34 @@ jobs:
           cache: "npm"
           cache-dependency-path: e2e/package-lock.json
 
-      - name: Install Playwright
-        working-directory: e2e
-        run: npm ci && npx playwright install --with-deps chromium
-
-      - name: Run E2E tests
-        working-directory: e2e
-        run: npx playwright test
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: e2e
+          browser: chrome
+          install-command: npm ci
         env:
+          CYPRESS_BASE_URL: ${{ vars.STAGING_URL }}
           BASE_URL: ${{ vars.STAGING_URL }}
           TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
           TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
           TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
 
-      - name: Upload rapport Playwright
+      - name: Upload screenshots si échec
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots-${{ env.IMAGE_TAG }}
+          path: e2e/cypress/screenshots/
+          retention-days: 30
+
+      - name: Upload vidéos
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report-${{ env.IMAGE_TAG }}
-          path: e2e/playwright-report/
+          name: cypress-videos-${{ env.IMAGE_TAG }}
+          path: e2e/cypress/videos/
           retention-days: 30
 
   # ──────────────────────────────────────────────────────────────────
