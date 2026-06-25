@@ -66,7 +66,7 @@ jobs:
           username: ${{ secrets.STAGING_SSH_USER }}
           key_path: /github/runner_temp/staging_key
           port: ${{ secrets.STAGING_SSH_PORT || '22' }}
-          source: "docker-compose.yml,nginx/"
+          source: "docker-compose.yml,docker-compose.staging.yml,nginx/"
           target: "/var/www/gauthierfitness-staging/"
 
       - name: Deploy via SSH
@@ -85,21 +85,24 @@ jobs:
             echo "${{ secrets.GHCR_TOKEN }}" | \
               docker login ghcr.io -u CharlesGAUTHIER1999 --password-stdin
 
+            # Override staging (HTTPS) appliqué à toutes les commandes
+            DC="docker compose -f docker-compose.yml -f docker-compose.staging.yml"
+
             # Pull nouvelles images
             export IMAGE_TAG=$IMAGE_TAG
-            docker compose pull
+            $DC pull
 
             # Migrations
-            docker compose run --rm backend php artisan migrate --force
+            $DC run --rm backend php artisan migrate --force
 
             # Redémarrage
-            docker compose up -d --remove-orphans
+            $DC up -d --remove-orphans
 
             # Optimisations
             sleep 5
-            docker compose exec -T backend php artisan config:cache
-            docker compose exec -T backend php artisan route:cache
-            docker compose exec -T backend php artisan view:cache
+            $DC exec -T backend php artisan config:cache
+            $DC exec -T backend php artisan route:cache
+            $DC exec -T backend php artisan view:cache
 
             # Nettoyage
             docker image prune -f
