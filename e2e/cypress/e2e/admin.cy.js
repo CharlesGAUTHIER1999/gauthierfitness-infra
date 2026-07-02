@@ -58,7 +58,7 @@ describe('Protection des routes admin', () => {
     cy.loginAsUser();
     cy.visit('/admin', { failOnStatusCode: false });
 
-    // Soit redirect, soit page 403
+    // Either a redirect, or a 403 page
     cy.url().then((url) => {
       if (url.includes('/admin')) {
         cy.findByText(/403|interdit|forbidden|accès refusé/i).should('be.visible');

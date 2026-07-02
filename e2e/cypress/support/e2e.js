@@ -1,9 +1,9 @@
-// Commandes Cypress globales et plugins.
+// Global Cypress commands and plugins
+
 import '@testing-library/cypress/add-commands';
 
 /**
- * Cypress.Commands.add('loginAsAdmin', ...) — Helper de connexion admin partagé
- * par les specs admin/stock.
+ * Logs in as an admin user; shared helper used by the admin/stock specs
  */
 Cypress.Commands.add('loginAsAdmin', () => {
   const email = Cypress.env('TEST_ADMIN_EMAIL');
@@ -16,6 +16,9 @@ Cypress.Commands.add('loginAsAdmin', () => {
   cy.url({ timeout: 10000 }).should('match', /admin/);
 });
 
+/**
+ * Logs in as a regular customer user; shared helper used by the auth specs
+ */
 Cypress.Commands.add('loginAsUser', () => {
   const email = Cypress.env('TEST_USER_EMAIL');
   const password = Cypress.env('TEST_USER_PASSWORD');

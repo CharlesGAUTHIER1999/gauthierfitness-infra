@@ -1,19 +1,19 @@
 # ════════════════════════════════════════════════════════════════════
-#  GauthierFitness — Pipeline de déploiement
-#  repo : CharlesGAUTHIER1999/gauthierfitness-infra
+#  GauthierFitness - Deploy pipeline
+#  repo: CharlesGAUTHIER1999/gauthierfitness-infra
 #
-#  Déclenché :
-#    - Manuellement (workflow_dispatch) avec choix de l'image
-#    - Automatiquement via repository_dispatch depuis backend/frontend CI
+#  Triggered :
+#    - Manually (workflow_dispatch) with an image choice
+#    - Automatically via repository_dispatch from the backend/frontend CI
 #
-#  Séquence : Deploy Staging → Tests E2E → Deploy Prod (gate manuelle)
-#  Ou      : Deploy Prod directement (prod-only)
+#  Sequence : Deploy Staging → E2E Tests → Deploy Prod (manual gate)
+#  Or       : Deploy Prod directly (prod-only)
 # ════════════════════════════════════════════════════════════════════
 
 name: Deploy Pipeline
 
 on:
-  # Déclenchement manuel depuis GitHub UI
+  # Manual trigger from GitHub UI
   workflow_dispatch:
     inputs:
       image_tag:
@@ -27,7 +27,7 @@ on:
         type: choice
         options: [staging, prod-only, both]
 
-  # Déclenchement automatique depuis les CI backend/frontend
+  # Automatic trigger from backend/frontend CI
   repository_dispatch:
     types: [deploy-staging]
 
@@ -35,11 +35,11 @@ env:
   IMAGE_TAG: ${{ github.event.inputs.image_tag || github.event.client_payload.image_tag || 'develop' }}
 
 # ──────────────────────────────────────────────────────────────────
-# JOB 1 — Déploiement Staging
+# JOB 1 - Staging deployment
 # ──────────────────────────────────────────────────────────────────
 jobs:
   deploy-staging:
-    name: "🚀 Déploiement Staging"
+    name: "Staging Deployment"
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'repository_dispatch' ||
@@ -81,39 +81,39 @@ jobs:
             set -e
             cd /var/www/gauthierfitness-staging
 
-            # Authentification GHCR
+            # GHCR authentication
             echo "${{ secrets.GHCR_TOKEN }}" | \
               docker login ghcr.io -u CharlesGAUTHIER1999 --password-stdin
 
-            # Override staging (HTTPS) appliqué à toutes les commandes
+            # Staging override (HTTPS) applied to every command
             DC="docker compose -f docker-compose.yml -f docker-compose.staging.yml"
 
-            # Pull nouvelles images
+            # Pull new images
             export IMAGE_TAG=$IMAGE_TAG
             $DC pull
 
             # Migrations
             $DC run --rm backend php artisan migrate --force
 
-            # Redémarrage
+            # Restart
             $DC up -d --remove-orphans
 
-            # Optimisations
+            # Optimizations
             sleep 5
             $DC exec -T backend php artisan config:cache
             $DC exec -T backend php artisan route:cache
             $DC exec -T backend php artisan view:cache
 
-            # Nettoyage
+            # Clean up
             docker image prune -f
 
-            echo "✅ Staging déployé — tag: $IMAGE_TAG — $(date)"
+            echo "Staging deployed - tag: $IMAGE_TAG - $(date)"
 
   # ──────────────────────────────────────────────────────────────────
-  # JOB 2 — Tests E2E Playwright
+  # JOB 2 - Cypress E2E tests
   # ──────────────────────────────────────────────────────────────────
   e2e:
-    name: "🌲 Tests E2E Cypress"
+    name: "Tests E2E Cypress"
     runs-on: ubuntu-latest
     needs: deploy-staging
     if: needs.deploy-staging.result == 'success'
@@ -160,14 +160,12 @@ jobs:
           retention-days: 30
 
   # ──────────────────────────────────────────────────────────────────
-  # JOB 3 — Déploiement Production
+  # JOB 3 - Production deployment
   # ──────────────────────────────────────────────────────────────────
   deploy-prod:
-    name: "🏁 Déploiement Production OVH"
+    name: "Production Deployment"
     runs-on: ubuntu-latest
     needs: [deploy-staging, e2e]
-    # prod-only : deploy direct sans passer par staging/e2e
-    # both      : deploy après e2e réussi
     if: |
       always() &&
       (
@@ -219,6 +217,7 @@ jobs:
             echo "${{ secrets.GHCR_TOKEN }}" | \
               docker login ghcr.io -u CharlesGAUTHIER1999 --password-stdin
 
+            # Deploy via SSH: pull new images, run migrations, restart and warm caches
             export IMAGE_TAG=$IMAGE_TAG
             docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
 
@@ -235,4 +234,4 @@ jobs:
             docker compose exec -T backend php artisan up
 
             docker image prune -f
-            echo "✅ Production déployée — tag: $IMAGE_TAG — $(date)"
+            echo "Production deployed - tag: $IMAGE_TAG - $(date)"

@@ -1,7 +1,7 @@
 # ════════════════════════════════════════════════════════════════════
-#  GauthierFitness — Staging Override (HTTPS)
-#  Usage: docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d
-#  ⚠  Ne pas redéfinir les images ici : docker-compose.yml a déjà les bons noms
+#  GauthierFitness - Staging override (HTTPS)
+#  Usage : docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d
+#  Do not redefine images here : docker-compose.yml already has the right names
 # ════════════════════════════════════════════════════════════════════
 
 services:

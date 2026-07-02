@@ -1,7 +1,7 @@
 # ════════════════════════════════════════════════════════════════════
-#  GauthierFitness — Production Override
-#  Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-#  ⚠  Ne pas redéfinir les images ici : docker-compose.yml a déjà les bons noms
+#  GauthierFitness - Production override
+#  Usage : docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#  Do not redefine images here : docker-compose.yml already has the right names
 # ════════════════════════════════════════════════════════════════════
 
 services:
