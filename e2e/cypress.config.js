@@ -1,6 +1,6 @@
 /**
- * GauthierFitness - Configuration Cypress
- * Tests E2E executes contre staging (BASE_URL) ou local.
+ * GauthierFitness - Cypress configuration
+ * E2E tests run against staging (BASE_URL) or local
  */
 const { defineConfig } = require('cypress');
 

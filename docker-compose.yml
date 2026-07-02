@@ -1,10 +1,10 @@
 # ════════════════════════════════════════════════════════════════════
-#  GauthierFitness — Stack complète (images GHCR)
-#  repo : CharlesGAUTHIER1999/gauthierfitness-infra
+#  GauthierFitness - Full stack (GHCR images)
+#  repo: CharlesGAUTHIER1999/gauthierfitness-infra
 #
-#  Usage staging :
+#  Staging usage:
 #    IMAGE_TAG=develop docker compose -f docker-compose.yml up -d
-#  Usage prod :
+#  Prod usage:
 #    IMAGE_TAG=latest  docker compose -f docker-compose.yml \
 #                                     -f docker-compose.prod.yml up -d
 # ════════════════════════════════════════════════════════════════════
@@ -27,7 +27,7 @@ services:
       - gf_network
     restart: unless-stopped
 
-  # ── Backend Laravel (image construite par ci-backend.yml) ────────
+  # ── Laravel backend (image built by ci-backend.yml) ──────────────
   backend:
     image: ghcr.io/charlesgauthier1999/gauthierfitness-backend:${IMAGE_TAG:-latest}
     container_name: gf_backend
@@ -44,7 +44,7 @@ services:
       - gf_network
     restart: unless-stopped
 
-  # ── Frontend React (image construite par ci-frontend.yml) ────────
+  # ── React frontend (image built by ci-frontend.yml) ──────────────
   frontend:
     image: ghcr.io/charlesgauthier1999/gauthierfitness-frontend:${IMAGE_TAG:-latest}
     container_name: gf_frontend
@@ -65,9 +65,6 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD:-gauthier_password}
     volumes:
       - db_data:/var/lib/mysql
-    # ⚠ Pas de "ports:" ici — MySQL ne doit JAMAIS être exposé à internet.
-    # Le backend y accède via le réseau Docker interne (hostname "db").
-    # Pour un accès local ponctuel : tunnel SSH (ssh -L 3306:localhost:3306 ...).
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -102,17 +99,6 @@ services:
     networks:
       - gf_network
     restart: unless-stopped
-
-  # ══ FUTURS MICROSERVICES (décommenter au besoin) ══════════════════
-  # ai-service:
-  #   image: ghcr.io/charlesgauthier1999/gauthierfitness-ai:${IMAGE_TAG:-latest}
-  #   container_name: gf_ai
-  #   networks: [gf_network]
-
-  # 3d-service:
-  #   image: ghcr.io/charlesgauthier1999/gauthierfitness-3d:${IMAGE_TAG:-latest}
-  #   container_name: gf_3d
-  #   networks: [gf_network]
 
 networks:
   gf_network:
