@@ -149,7 +149,7 @@ jobs:
           TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
 
       - name: Upload screenshots si échec
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: cypress-screenshots-${{ env.IMAGE_TAG }}
@@ -157,7 +157,7 @@ jobs:
           retention-days: 30
 
       - name: Upload vidéos
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: cypress-videos-${{ env.IMAGE_TAG }}
