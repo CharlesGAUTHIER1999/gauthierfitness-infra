@@ -135,7 +135,7 @@ jobs:
           cache-dependency-path: e2e/package-lock.json
 
       - name: Cypress run
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           working-directory: e2e
           browser: chrome
