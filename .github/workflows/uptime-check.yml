@@ -1,0 +1,28 @@
+name: Uptime Check
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check production frontend (gauthierfitness.fr)
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 https://gauthierfitness.fr)
+          echo "HTTP status: $status"
+          if [ "$status" != "200" ]; then
+            echo "::error::Production frontend is unreachable (HTTP $status)"
+            exit 1
+          fi
+
+      - name: Check production API health (api.gauthierfitness.fr/api/health)
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 https://api.gauthierfitness.fr/api/health)
+          echo "HTTP status: $status"
+          if [ "$status" != "200" ]; then
+            echo "::error::Production API health check failed (HTTP $status)"
+            exit 1
+          fi
