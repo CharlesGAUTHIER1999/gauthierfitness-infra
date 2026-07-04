@@ -60,7 +60,7 @@ jobs:
           chmod 644 $RUNNER_TEMP/staging_key
 
       - name: Copier docker-compose + nginx vers VPS
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.STAGING_SSH_HOST }}
           username: ${{ secrets.STAGING_SSH_USER }}
@@ -198,7 +198,7 @@ jobs:
           chmod 644 $RUNNER_TEMP/prod_key
 
       - name: Copier fichiers vers VPS prod
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.PROD_SSH_HOST }}
           username: ${{ secrets.PROD_SSH_USER }}
