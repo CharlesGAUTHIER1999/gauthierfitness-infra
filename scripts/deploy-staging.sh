@@ -34,6 +34,12 @@ $COMPOSE run --rm backend php artisan migrate --force
 echo "→ Redémarrage des conteneurs..."
 $COMPOSE up -d --remove-orphans
 
+# Restart nginx too: it resolves the "backend" hostname to a Docker network IP
+# only once at its own startup. When "backend" is recreated above, it gets a
+# new IP, and nginx would keep proxying to the stale one (site-wide 502) until
+# it is restarted itself.
+$COMPOSE restart nginx
+
 # Wait for the backend to be ready
 sleep 5
 

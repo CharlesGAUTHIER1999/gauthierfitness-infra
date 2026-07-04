@@ -100,6 +100,22 @@ services:
       - gf_network
     restart: unless-stopped
 
+  # ── Scheduler (runs artisan schedule:work, e.g. carts:purge-abandoned) ──
+  scheduler:
+    image: ghcr.io/charlesgauthier1999/gauthierfitness-backend:${IMAGE_TAG:-latest}
+    container_name: gf_scheduler
+    command: ["php", "artisan", "schedule:work"]
+    env_file:
+      - .env
+    volumes:
+      - backend_storage:/var/www/html/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - gf_network
+    restart: unless-stopped
+
 networks:
   gf_network:
     driver: bridge

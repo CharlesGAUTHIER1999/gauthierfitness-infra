@@ -98,6 +98,11 @@ jobs:
             # Restart
             $DC up -d --remove-orphans
 
+            # Restart nginx too: it caches the "backend" container's Docker-network
+            # IP at its own startup, and won't notice "backend" was just recreated
+            # above (site-wide 502 until nginx itself is restarted).
+            $DC restart nginx
+
             # Optimizations
             sleep 5
             $DC exec -T backend php artisan config:cache
@@ -226,6 +231,12 @@ jobs:
               run --rm backend php artisan migrate --force
             docker compose -f docker-compose.yml -f docker-compose.prod.yml \
               up -d --remove-orphans
+
+            # Restart nginx too: it caches the "backend" container's Docker-network
+            # IP at its own startup, and won't notice "backend" was just recreated
+            # above (site-wide 502 until nginx itself is restarted).
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+              restart nginx
 
             sleep 8
             docker compose exec -T backend php artisan config:cache
