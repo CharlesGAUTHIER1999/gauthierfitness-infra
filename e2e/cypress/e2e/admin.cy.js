@@ -5,10 +5,12 @@ describe('Admin — Dashboard', () => {
 
   it('le dashboard affiche les métriques clés', () => {
     cy.visit('/admin');
-    cy.findByText(/chiffre d'affaires|revenue/i).should('be.visible');
-    cy.findByText(/commandes|orders/i).should('be.visible');
-    cy.findByText(/produits|products/i).should('be.visible');
-    cy.findByText(/stock/i).should('be.visible');
+    // Scoped to the metric cards: the sidebar nav repeats these same words
+    // (Commandes, Produits, Stocks), which makes an unscoped findByText ambiguous.
+    cy.get('.adm-metric-label').contains(/chiffre d'affaires|revenue/i).should('be.visible');
+    cy.get('.adm-metric-label').contains(/commandes|orders/i).should('be.visible');
+    cy.get('.adm-metric-label').contains(/produits|products/i).should('be.visible');
+    cy.get('.adm-metric-label').contains(/stock/i).should('be.visible');
   });
 
   it('les chiffres sont numériques (au moins une métrique visible)', () => {
@@ -24,7 +26,8 @@ describe('Admin — Commandes', () => {
 
   it('la liste des commandes charge', () => {
     cy.visit('/admin/orders');
-    cy.findByText(/commandes|orders/i).should('be.visible');
+    // Scoped to the page title: the sidebar nav also has a "Commandes" link.
+    cy.get('h1').contains(/commandes|orders/i).should('be.visible');
     cy.get('table, [data-testid="orders-list"]', { timeout: 10000 })
       .first()
       .should('be.visible');
@@ -34,7 +37,7 @@ describe('Admin — Commandes', () => {
     cy.visit('/admin/orders');
     cy.get('select, [role="combobox"]').then(($filters) => {
       if ($filters.length > 0) {
-        cy.wrap($filters[0]).select(['new', 'nouveau'], { force: true });
+        cy.wrap($filters[0]).select('new', { force: true });
         cy.wait(500);
         cy.get('body').should('not.contain.text', /erreur|error|500/i);
       }
