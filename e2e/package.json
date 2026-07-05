@@ -8,7 +8,7 @@
     "open": "cypress open"
   },
   "devDependencies": {
-    "cypress": "^14.0.0",
+    "cypress": "^15.18.0",
     "@testing-library/cypress": "^10.0.0"
   }
 }
