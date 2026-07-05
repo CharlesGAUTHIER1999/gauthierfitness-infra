@@ -38,7 +38,10 @@ describe('Authentification', () => {
 
   it('inscription avec email déjà utilisé affiche une erreur', () => {
     cy.visit('/register');
-    cy.findAllByLabelText(/prénom|nom|name/i).first().type('Test');
+    // /prénom|nom|name/i matches both the Prénom and Nom fields ("Prénom" contains
+    // "nom"), so both must be filled explicitly or the required Nom field blocks
+    // submission via native HTML validation.
+    cy.findAllByLabelText(/prénom|nom|name/i).each(($el) => cy.wrap($el).type('Test'));
     cy.findByLabelText(/email/i).type(Cypress.env('TEST_USER_EMAIL'));
     cy.findAllByLabelText(/mot de passe|password/i).first().type(Cypress.env('TEST_USER_PASSWORD'), { log: false });
 
@@ -49,7 +52,7 @@ describe('Authentification', () => {
     });
 
     cy.findByRole('button', { name: /inscription|register|créer/i }).click();
-    cy.findByText(/déjà utilisé|already taken|exists/i, { timeout: 8000 })
+    cy.findByText(/déjà utilisé|already.*taken|exists/i, { timeout: 8000 })
       .should('be.visible');
   });
 
