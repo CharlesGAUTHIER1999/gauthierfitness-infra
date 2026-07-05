@@ -26,8 +26,13 @@ describe('Authentification', () => {
   });
 
   it("connexion avec bons identifiants redirige vers l'espace client", () => {
-    cy.loginAsUser();
-    cy.url().should('match', /(profile|account|boutique|shop|\/)/);
+    cy.intercept('POST', '**/api/login').as('loginRequest');
+    cy.visit('/login');
+    cy.findByLabelText(/email/i).type(Cypress.env('TEST_USER_EMAIL'));
+    cy.findByLabelText(/mot de passe|password/i).type(Cypress.env('TEST_USER_PASSWORD'), { log: false });
+    cy.findByRole('button', { name: /connexion|se connecter|login/i }).click();
+    cy.wait('@loginRequest');
+    cy.url({ timeout: 10000 }).should('match', /(profile|account|boutique|shop|\/)/);
   });
 
   it("la page d'inscription est accessible", () => {
@@ -58,6 +63,9 @@ describe('Authentification', () => {
 
   it('déconnexion fonctionne', () => {
     cy.loginAsUser();
+    // The logout button lives on /account (and /admin), not the storefront home
+    // page loginAsUser lands on — visit it explicitly rather than assuming.
+    cy.visit('/account');
 
     cy.findAllByRole('button', { name: /déconnexion|logout/i }).then(($btns) => {
       if ($btns.length > 0) {
