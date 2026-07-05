@@ -48,13 +48,19 @@ describe('Admin — Stocks', () => {
       cy.wrap($links[0]).click();
       cy.url().should('match', /\/admin\/products\/\d+\/stock/i);
 
+      // The add-lot form is hidden behind a "+ Réapprovisionner" toggle button.
+      cy.findAllByRole('button', { name: /réapprovisionner/i }).first().click();
+
       cy.get('input[placeholder*="lot" i], input[name*="lot" i]').then(($lotInputs) => {
         if ($lotInputs.length === 0) return;
-        cy.wrap($lotInputs[0]).type(`LOT-E2E-${Date.now()}`);
+        const lotNumber = `LOT-E2E-${Date.now()}`;
+        cy.wrap($lotInputs[0]).type(lotNumber);
         cy.findAllByLabelText(/quantité|quantity/i).first().type('10');
-        cy.findAllByRole('button', { name: /ajouter|add|valider/i }).first().click();
-        cy.findByText(/ajouté|créé|created|success/i, { timeout: 8000 })
-          .should('be.visible');
+        cy.findAllByRole('button', { name: /ajouter|add|valider|confirmer/i }).first().click();
+        // No success toast exists — the form just closes and the lot appears in the table.
+        // The lot number sits next to a "Lot " prefix in the same cell ("Lot LOT-E2E-…"),
+        // so an exact-text match would never hit — search with exact: false instead.
+        cy.findByText(lotNumber, { timeout: 12000, exact: false }).should('be.visible');
       });
     });
   });
@@ -81,13 +87,19 @@ describe('Admin — Stocks', () => {
       cy.wrap($links[0]).click();
       cy.url().should('match', /\/admin\/products\/\d+\/stock/i);
 
+      // The add-lot form is hidden behind a "+ Réapprovisionner" toggle button.
+      cy.findAllByRole('button', { name: /réapprovisionner/i }).first().click();
+
       cy.get('input[placeholder*="lot" i], input[name*="lot" i]').then(($lotInputs) => {
         if ($lotInputs.length === 0) return;
         cy.wrap($lotInputs[0]).type('LOT-ZERO');
-        cy.findAllByLabelText(/quantité|quantity/i).first().type('0');
-        cy.findAllByRole('button', { name: /ajouter|add|valider/i }).first().click();
-        cy.findByText(/quantité|quantity|minimum|invalid/i, { timeout: 5000 })
-          .should('be.visible');
+        cy.findAllByLabelText(/quantité|quantity/i).first().as('qtyInput').type('0');
+        cy.findAllByRole('button', { name: /ajouter|add|valider|confirmer/i }).first().click();
+        // quantity has min="1": the browser's native constraint validation blocks
+        // submission before any custom error text would render.
+        cy.get('@qtyInput').then(($input) => {
+          expect($input[0].validity.valid).to.be.false;
+        });
       });
     });
   });
