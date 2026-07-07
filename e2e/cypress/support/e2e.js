@@ -2,23 +2,28 @@
 
 import '@testing-library/cypress/add-commands';
 
-// Authenticates via the API directly and seeds localStorage before any app JS
-// runs, then visits the target page. Bypasses the login *form* entirely — the
-// form itself (and its post-login redirect) is covered on its own in
-// auth.cy.js. This sidesteps a real React timing race between the login
-// page's navigate() call and the auth context's state update, where the app
-// can occasionally land on /account or /login right after a perfectly valid
-// login — confirmed by tracing the network activity of repeated admin logins,
-// not something worth chasing in production code this close to the freeze.
-function loginViaApi(email, password, landingPath) {
-  cy.request('POST', '/api/login', { email, password }).then(({ body }) => {
-    cy.visit(landingPath, {
-      onBeforeLoad(win) {
-        win.localStorage.setItem('token', body.token);
-        win.localStorage.setItem('user', JSON.stringify(body.user));
-      },
+function loginViaApi(sessionKey, email, password, landingPath) {
+  cy.session(sessionKey, () => {
+    cy.request('POST', '/api/login', { email, password }).then(({ body }) => {
+      cy.visit(landingPath, {
+        onBeforeLoad(win) {
+          win.localStorage.setItem('token', body.token);
+          win.localStorage.setItem('user', JSON.stringify(body.user));
+        },
+      });
     });
+  }, {
+    cacheAcrossSpecs: true,
+    validate() {
+      cy.request({
+        method: 'GET',
+        url: '/api/me',
+        headers: { Authorization: `Bearer ${window.localStorage.getItem('token')}` },
+      });
+    },
   });
+
+  cy.visit(landingPath);
 }
 
 /**
@@ -26,7 +31,7 @@ function loginViaApi(email, password, landingPath) {
  * by the admin/stock specs.
  */
 Cypress.Commands.add('loginAsAdmin', () => {
-  loginViaApi(Cypress.env('TEST_ADMIN_EMAIL'), Cypress.env('TEST_ADMIN_PASSWORD'), '/admin');
+  loginViaApi('admin', Cypress.env('TEST_ADMIN_EMAIL'), Cypress.env('TEST_ADMIN_PASSWORD'), '/admin');
   cy.url({ timeout: 10000 }).should('match', /admin/);
 });
 
@@ -36,6 +41,6 @@ Cypress.Commands.add('loginAsAdmin', () => {
  * *form* itself is exercised directly (not through this command) in auth.cy.js.
  */
 Cypress.Commands.add('loginAsUser', () => {
-  loginViaApi(Cypress.env('TEST_USER_EMAIL'), Cypress.env('TEST_USER_PASSWORD'), '/');
+  loginViaApi('user', Cypress.env('TEST_USER_EMAIL'), Cypress.env('TEST_USER_PASSWORD'), '/');
   cy.url({ timeout: 10000 }).should('not.match', /\/login/);
 });
