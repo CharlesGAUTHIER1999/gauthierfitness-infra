@@ -34,3 +34,6 @@ services:
 
   queue:
     restart: always
+
+  scheduler:
+    restart: always
