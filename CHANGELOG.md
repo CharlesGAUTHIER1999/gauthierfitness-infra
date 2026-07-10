@@ -4,6 +4,12 @@ Toutes les évolutions notables de l'infrastructure GauthierFitness sont documen
 
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/).
 
+## [v1.0.1] - 2026-07-10
+
+### Fixed
+- CSP : ajout de `wasm-unsafe-eval` et `blob:` pour débloquer le configurateur 3D (page blanche en production, voir Fiche d'incident 8).
+- Nginx : `fastcgi_read_timeout` relevé à 200s pour aligner le proxy sur le timeout réel de la génération IA (voir Fiche d'incident 9).
+
 ## [v1.0.0] - 2026-07-08
 
 Première release taguée de l'infra. Pipeline de déploiement continu complet pour le staging et la production sur
