@@ -66,7 +66,7 @@ jobs:
           username: ${{ secrets.STAGING_SSH_USER }}
           key_path: /github/runner_temp/staging_key
           port: ${{ secrets.STAGING_SSH_PORT || '22' }}
-          source: "docker-compose.yml,docker-compose.staging.yml,nginx/"
+          source: "docker-compose.yml,docker-compose.staging.yml,nginx/,scripts/backup-db.sh"
           target: "/var/www/gauthierfitness-staging/"
 
       - name: Deploy via SSH
@@ -80,6 +80,7 @@ jobs:
           script: |
             set -e
             cd /var/www/gauthierfitness-staging
+            chmod +x scripts/backup-db.sh
 
             # GHCR authentication
             echo "${{ secrets.GHCR_TOKEN }}" | \
@@ -204,7 +205,7 @@ jobs:
           username: ${{ secrets.PROD_SSH_USER }}
           key_path: /github/runner_temp/prod_key
           port: ${{ secrets.PROD_SSH_PORT || '22' }}
-          source: "docker-compose.yml,docker-compose.prod.yml,nginx/"
+          source: "docker-compose.yml,docker-compose.prod.yml,nginx/,scripts/backup-db.sh"
           target: "/var/www/gauthierfitness/"
 
       - name: Deploy via SSH
@@ -218,6 +219,7 @@ jobs:
           script: |
             set -e
             cd /var/www/gauthierfitness
+            chmod +x scripts/backup-db.sh
 
             echo "${{ secrets.GHCR_TOKEN }}" | \
               docker login ghcr.io -u CharlesGAUTHIER1999 --password-stdin
