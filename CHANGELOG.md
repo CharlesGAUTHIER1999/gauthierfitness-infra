@@ -4,6 +4,18 @@ Toutes les évolutions notables de l'infrastructure GauthierFitness sont documen
 
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/).
 
+## [v1.1.0] - 2026-07-12
+
+### Added
+- Sauvegarde quotidienne chiffrée de la base MySQL (`scripts/backup-db.sh`, GPG) et script de test de restauration mensuel (`scripts/restore-db-test.sh`).
+
+### Changed
+- `deploy.yml` synchronise désormais `backup-db.sh` sur le VPS à chaque déploiement.
+- Commentaires et scripts infra traduits en anglais (`.gitignore`, `.env.*.example`, configs Nginx, scripts de backup/restauration).
+
+### Fixed
+- `restore-db-test.sh` : évite une race condition avec le redémarrage interne de MySQL au premier lancement (exige deux pings positifs consécutifs).
+
 ## [v1.0.1] - 2026-07-10
 
 ### Fixed
