@@ -40,7 +40,7 @@ Thumbs.db
 *.code-workspace
 
 # ─── Docker ───────────────────────────────────────────────────────
-# Les fichiers docker-compose.*.yml sont committés intentionnellement
+# docker-compose.*.yml files are committed intentionally
 
 # ─── Logs ─────────────────────────────────────────────────────────
 *.log
