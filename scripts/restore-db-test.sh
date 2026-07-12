@@ -28,12 +28,11 @@ trap 'rm -rf "$WORKDIR"' EXIT
 
 echo "→ Looking up the latest backup for ${TARGET} (hostname: ${HOST_FILTER})..."
 LATEST_KEY=$(AWS_ACCESS_KEY_ID="$OVH_S3_ACCESS_KEY" AWS_SECRET_ACCESS_KEY="$OVH_S3_SECRET_KEY" \
-  aws s3api list-objects-v2 --bucket "$OVH_S3_BUCKET" --prefix "db-backups/" \
-  --endpoint-url "$OVH_S3_ENDPOINT" --query "sort_by(Contents,&LastModified)[].Key" --output text \
-  | tr '\t' '\n' | grep "$HOST_FILTER" | tail -1)
+  aws s3api list-objects-v2 --bucket "$OVH_S3_BUCKET" --prefix "db-backups/gauthier_fitness_${TARGET}" \
+  --endpoint-url "$OVH_S3_ENDPOINT" --query "sort_by(Contents,&LastModified)[-1].Key" --output text)
 
 if [ -z "$LATEST_KEY" ] || [ "$LATEST_KEY" = "None" ]; then
-  echo "❌ No backup found for ${TARGET}"
+  echo "No backup found for ${TARGET}"
   exit 1
 fi
 echo "  latest backup: $LATEST_KEY"
@@ -66,7 +65,7 @@ for i in $(seq 1 40); do
   sleep 2
 done
 if [ "$READY" -ne 1 ]; then
-  echo "❌ MySQL never responded reliably"
+  echo "MySQL never responded reliably"
   exit 1
 fi
 
@@ -77,9 +76,9 @@ TABLE_COUNT=$(docker exec gf-restore-test mysql -uroot -ptest restore_test -N -e
 
 echo ""
 if [ "$TABLE_COUNT" -gt 0 ]; then
-  echo "✅  Restore OK: $TABLE_COUNT tables restored from $LATEST_KEY"
+  echo "Restore OK: $TABLE_COUNT tables restored from $LATEST_KEY"
 else
-  echo "❌  Suspicious restore: 0 tables found"
+  echo "Suspicious restore: 0 tables found"
   exit 1
 fi
 
