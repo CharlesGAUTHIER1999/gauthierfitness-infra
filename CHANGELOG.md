@@ -4,6 +4,11 @@ Toutes les évolutions notables de l'infrastructure GauthierFitness sont documen
 
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/).
 
+## [v1.1.2] - 2026-07-13
+
+### Fixed
+- `deploy.yml` : le déploiement staging/prod échouait (`ssh: unable to authenticate`) après la mise à jour groupée des actions GitHub — `appleboy/scp-action` était passé de v0.1.7 à v1.0.0 (bump majeur caché dans le groupe), rendant invalide le chemin codé en dur `/github/runner_temp/{staging,prod}_key` utilisé pour la clé SSH. Remplacé par `${{ runner.temp }}/{staging,prod}_key`, cohérent avec ce qu'utilisait déjà l'étape `appleboy/ssh-action` voisine. Vérifié par un déploiement staging réel + suite E2E Cypress complète, les deux au vert.
+
 ## [v1.1.1] - 2026-07-13
 
 ### Fixed
