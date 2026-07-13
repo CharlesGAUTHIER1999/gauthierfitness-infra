@@ -4,6 +4,14 @@ Toutes les évolutions notables de l'infrastructure GauthierFitness sont documen
 
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/).
 
+## [v1.1.1] - 2026-07-13
+
+### Fixed
+- `security-scan.yml` : permission `issues: write` manquante empêchait `zaproxy/action-baseline` de consigner ses résultats sur GitHub Issues, faisant échouer le job même quand le scan lui-même ne relevait aucune faille bloquante (`FAIL-NEW: 0`). Vérifié en conditions réelles : le scan tourne désormais au vert et l'issue est bien créée.
+
+### Changed
+- Mise à jour des actions GitHub utilisées en CI/CD groupées par Dependabot (7 mises à jour).
+
 ## [v1.1.0] - 2026-07-12
 
 ### Added
