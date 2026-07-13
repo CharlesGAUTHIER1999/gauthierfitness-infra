@@ -52,7 +52,7 @@ jobs:
 
     steps:
       - name: Checkout infra
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Préparer la clé SSH
         run: |
@@ -60,7 +60,7 @@ jobs:
           chmod 644 $RUNNER_TEMP/staging_key
 
       - name: Copier docker-compose + nginx vers VPS
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.STAGING_SSH_HOST }}
           username: ${{ secrets.STAGING_SSH_USER }}
@@ -70,7 +70,7 @@ jobs:
           target: "/var/www/gauthierfitness-staging/"
 
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.STAGING_SSH_HOST }}
           username: ${{ secrets.STAGING_SSH_USER }}
@@ -126,17 +126,17 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node 22
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
           cache: "npm"
           cache-dependency-path: e2e/package-lock.json
 
       - name: Cypress run
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           working-directory: e2e
           browser: chrome
@@ -150,7 +150,7 @@ jobs:
           TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
 
       - name: Upload screenshots si échec
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: cypress-screenshots-${{ env.IMAGE_TAG }}
@@ -158,7 +158,7 @@ jobs:
           retention-days: 30
 
       - name: Upload vidéos
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: cypress-videos-${{ env.IMAGE_TAG }}
@@ -191,7 +191,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Préparer la clé SSH
         run: |
@@ -199,7 +199,7 @@ jobs:
           chmod 644 $RUNNER_TEMP/prod_key
 
       - name: Copier fichiers vers VPS prod
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.PROD_SSH_HOST }}
           username: ${{ secrets.PROD_SSH_USER }}
@@ -209,7 +209,7 @@ jobs:
           target: "/var/www/gauthierfitness/"
 
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.PROD_SSH_HOST }}
           username: ${{ secrets.PROD_SSH_USER }}
