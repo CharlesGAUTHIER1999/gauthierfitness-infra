@@ -44,6 +44,47 @@ describe('Parcours d\'achat', () => {
   });
 });
 
+describe('Parcours d\'achat invité', () => {
+  it('permet de finaliser un achat sans être connecté, avec une option pour se connecter au checkout', () => {
+    // No cy.loginAsUser() here — this journey stays anonymous end to end.
+    cy.request('/api/products?per_page=50').then(({ body }) => {
+      const product = body.data[0];
+      expect(product, 'un produit existe').to.exist;
+
+      cy.visit(`/products/${product.slug}`);
+
+      cy.get('body').then(($body) => {
+        const opt = $body.find('.pd-size:not([disabled])').first();
+        if (opt.length) cy.wrap(opt).click();
+      });
+
+      cy.findByRole('button', { name: /ajouter au panier/i }).click();
+    });
+
+    cy.visit('/checkout');
+
+    // Guest checkout must not bounce to /login.
+    cy.location('pathname').should('eq', '/checkout');
+    cy.findByRole('link', { name: /se connecter/i }).should('be.visible');
+
+    cy.get('#email').clear().type('e2e-guest@gauthierfitness.fr');
+    cy.get('#firstname').clear().type('Invité');
+    cy.get('#lastname').clear().type('E2E');
+    cy.get('#address').clear().type('12 Rue de la Paix');
+    cy.get('#zip').clear().type('75002');
+    cy.get('#city').clear().type('Paris');
+
+    cy.findByRole('button', { name: /continuer vers le paiement/i }).click();
+
+    // Same rationale as the authenticated journey above: Stripe's iframe is
+    // opaque to Cypress by design, so this confirms the intent was created
+    // successfully (guest-token path) up to a rendered payment form.
+    cy.get('.ck-payment-element iframe[name^="__privateStripeFrame"]', { timeout: 15000 })
+      .should('exist');
+    cy.findByRole('button', { name: /payer maintenant/i }).should('be.visible').and('not.be.disabled');
+  });
+});
+
 describe('Personnalisation produit', () => {
   it('la page de personnalisation charge correctement pour un produit personnalisable', () => {
     cy.loginAsUser();
