@@ -5,8 +5,6 @@ describe('Admin — Dashboard', () => {
 
   it('le dashboard affiche les métriques clés', () => {
     cy.visit('/admin');
-    // Scoped to the metric cards: the sidebar nav repeats these same words
-    // (Commandes, Produits, Stocks), which makes an unscoped findByText ambiguous.
     cy.get('.adm-metric-label').contains(/chiffre d'affaires|revenue/i).should('be.visible');
     cy.get('.adm-metric-label').contains(/commandes|orders/i).should('be.visible');
     cy.get('.adm-metric-label').contains(/produits|products/i).should('be.visible');
@@ -26,7 +24,6 @@ describe('Admin — Commandes', () => {
 
   it('la liste des commandes charge', () => {
     cy.visit('/admin/orders');
-    // Scoped to the page title: the sidebar nav also has a "Commandes" link.
     cy.get('h1').contains(/commandes|orders/i).should('be.visible');
     cy.get('table, [data-testid="orders-list"]', { timeout: 10000 })
       .first()
@@ -61,7 +58,7 @@ describe('Protection des routes admin', () => {
     cy.loginAsUser();
     cy.visit('/admin', { failOnStatusCode: false });
 
-    // Either a redirect, or a 403 page
+    // Either a redirect, or 403 page
     cy.url().then((url) => {
       if (url.includes('/admin')) {
         cy.findByText(/403|interdit|forbidden|accès refusé/i).should('be.visible');

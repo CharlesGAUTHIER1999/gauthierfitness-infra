@@ -3,7 +3,7 @@
 #  repo: CharlesGAUTHIER1999/gauthierfitness-infra
 #
 #  Triggered :
-#    - Manually (workflow_dispatch) with an image choice
+#    - Manually (workflow_dispatch) with image choice
 #    - Automatically via repository_dispatch from the backend/frontend CI
 #
 #  Sequence : Deploy Staging → E2E Tests → Deploy Prod (manual gate)
@@ -25,18 +25,18 @@ on:
         required: true
         default: "staging"
         type: choice
-        options: [staging, prod-only, both]
+        options: [ staging, prod-only, both ]
 
   # Automatic trigger from backend/frontend CI
   repository_dispatch:
-    types: [deploy-staging]
+    types: [ deploy-staging ]
 
 env:
   IMAGE_TAG: ${{ github.event.inputs.image_tag || github.event.client_payload.image_tag || 'develop' }}
 
-# ──────────────────────────────────────────────────────────────────
+# ----------------------------
 # JOB 1 - Staging deployment
-# ──────────────────────────────────────────────────────────────────
+# ----------------------------
 jobs:
   deploy-staging:
     name: "Staging Deployment"
@@ -115,9 +115,9 @@ jobs:
 
             echo "Staging deployed - tag: $IMAGE_TAG - $(date)"
 
-  # ──────────────────────────────────────────────────────────────────
+  # ---------------------------
   # JOB 2 - Cypress E2E tests
-  # ──────────────────────────────────────────────────────────────────
+  # ---------------------------
   e2e:
     name: "Tests E2E Cypress"
     runs-on: ubuntu-latest
@@ -165,13 +165,13 @@ jobs:
           path: e2e/cypress/videos/
           retention-days: 30
 
-  # ──────────────────────────────────────────────────────────────────
+  # -------------------------------
   # JOB 3 - Production deployment
-  # ──────────────────────────────────────────────────────────────────
+  # -------------------------------
   deploy-prod:
     name: "Production Deployment"
     runs-on: ubuntu-latest
-    needs: [deploy-staging, e2e]
+    needs: [ deploy-staging, e2e ]
     if: |
       always() &&
       (

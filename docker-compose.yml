@@ -66,7 +66,7 @@ services:
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -88,7 +88,7 @@ services:
   queue:
     image: ghcr.io/charlesgauthier1999/gauthierfitness-backend:${IMAGE_TAG:-latest}
     container_name: gf_queue
-    command: ["php", "artisan", "queue:work", "--sleep=3", "--tries=3", "--max-time=3600"]
+    command: [ "php", "artisan", "queue:work", "--sleep=3", "--tries=3", "--max-time=3600" ]
     env_file:
       - .env
     volumes:
@@ -104,7 +104,7 @@ services:
   scheduler:
     image: ghcr.io/charlesgauthier1999/gauthierfitness-backend:${IMAGE_TAG:-latest}
     container_name: gf_scheduler
-    command: ["php", "artisan", "schedule:work"]
+    command: [ "php", "artisan", "schedule:work" ]
     env_file:
       - .env
     volumes:

@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 # ════════════════════════════════════════════════════════════════════
-#  GauthierFitness - Daily encrypted backup of the MySQL database
-#  Run via cron (03:00) on each VPS (staging and production)
-#  Requirements: awscli installed, GPG public key imported, file
-#                /etc/gauthierfitness/backup.env (chmod 600, root only)
+#  GauthierFitness - Daily encrypted backup of database
+#  Run via cron (03:00) on each VPS (staging + production)
+#  Requirements: awscli installed, GPG public key imported, file /etc/gauthierfitness/backup.env (chmod 600, root only)
 # ════════════════════════════════════════════════════════════════════
 set -euo pipefail
 
@@ -11,18 +10,13 @@ APP_DIR="${APP_DIR:-/var/www/gauthierfitness}"
 ENV_FILE="${BACKUP_ENV_FILE:-/etc/gauthierfitness/backup.env}"
 GPG_RECIPIENT="backup@gauthierfitness.fr"
 COMPOSE="docker compose"
-
-# shellcheck source=/dev/null
 source "$ENV_FILE"   # OVH_S3_ACCESS_KEY, OVH_S3_SECRET_KEY, OVH_S3_ENDPOINT, OVH_S3_BUCKET
-# shellcheck source=/dev/null
 source "$APP_DIR/.env"  # DB_DATABASE, DB_ROOT_PASSWORD
-
 TIMESTAMP="$(date '+%Y-%m-%d_%H%M%S')"
 HOSTNAME_TAG="$(hostname -s)"
 WORKDIR="$(mktemp -d)"
 DUMP_FILE="$WORKDIR/${DB_DATABASE}_${HOSTNAME_TAG}_${TIMESTAMP}.sql"
 ENC_FILE="${DUMP_FILE}.gpg"
-
 cleanup() { rm -rf "$WORKDIR"; }
 trap cleanup EXIT
 
@@ -60,5 +54,5 @@ aws s3api list-objects-v2 --bucket "$OVH_S3_BUCKET" --prefix "db-backups/${DB_DA
   done
 
 echo ""
-echo "✅  Encrypted backup complete: $(basename "$ENC_FILE")"
+echo "Encrypted backup complete: $(basename "$ENC_FILE")"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

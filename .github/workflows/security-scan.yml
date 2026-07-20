@@ -3,7 +3,7 @@ name: Security Scan (OWASP ZAP)
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: ["Deploy Pipeline"]
+    workflows: [ "Deploy Pipeline" ]
     types:
       - completed
 
