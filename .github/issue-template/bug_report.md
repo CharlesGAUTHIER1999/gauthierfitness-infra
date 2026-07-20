@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Signaler une anomalie détectée sur GauthierFitness
+about: Signalement d'une anomalie détectée sur GauthierFitness
 title: "[BUG] "
 labels: bug
 ---

@@ -31,7 +31,7 @@ Les images Docker du backend et du frontend sont **buildées par leurs CI respec
 ## Stack
 
 | Couche            | Technologie                                                          |
-|-------------------|------------------------------------------------------------------------|
+|-------------------|----------------------------------------------------------------------|
 | Conteneurisation  | Docker + Docker Compose v2                                           |
 | Reverse proxy     | Nginx Alpine 1.27                                                    |
 | Base de données   | MySQL 8                                                              |

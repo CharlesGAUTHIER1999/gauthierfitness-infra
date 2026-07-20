@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ════════════════════════════════════════════════════════════════════
 #  GauthierFitness - Staging deployment (OVH)
-#  Run by GitHub Actions runner over SSH (appleboy/ssh-action)
+#  Run by GitHub Actions runner over SSH
 #  Expected variables : IMAGE_TAG, GITHUB_REPOSITORY, GITHUB_ACTOR
 # ════════════════════════════════════════════════════════════════════
 set -euo pipefail
@@ -17,7 +17,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 
 cd "$APP_DIR"
 
-# 1. Pull the code (to get the updated docker-compose.yml)
+# 1. Pull the code
 echo "→ Git pull (develop)..."
 git pull origin develop
 
@@ -34,13 +34,10 @@ $COMPOSE run --rm backend php artisan migrate --force
 echo "→ Redémarrage des conteneurs..."
 $COMPOSE up -d --remove-orphans
 
-# Restart nginx too: it resolves the "backend" hostname to a Docker network IP
-# only once at its own startup. When "backend" is recreated above, it gets a
-# new IP, and nginx would keep proxying to the stale one (site-wide 502) until
-# it is restarted itself.
+# Restart nginx
 $COMPOSE restart nginx
 
-# Wait for the backend to be ready
+# Wait for backend to be ready
 sleep 5
 
 # 5. Laravel optimizations

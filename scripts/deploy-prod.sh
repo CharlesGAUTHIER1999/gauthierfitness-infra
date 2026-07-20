@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ════════════════════════════════════════════════════════════════════
 #  GauthierFitness - Production deployment (OVH)
-#  Run by GitHub Actions runner over SSH after a manual gate
+#  Run by GitHub Actions runner over SSH
 #  Expected variables : IMAGE_TAG, GITHUB_REPOSITORY, GITHUB_ACTOR
 # ════════════════════════════════════════════════════════════════════
 set -euo pipefail
@@ -27,7 +27,7 @@ echo "→ Pull des images Docker..."
 export IMAGE_TAG="${IMAGE_TAG:-latest}"
 $COMPOSE pull
 
-# 3. Maintenance mode (avoids requests during the migration)
+# 3. Maintenance mode
 echo "→ Mode maintenance activé..."
 $COMPOSE exec -T backend php artisan down --retry=5 || true
 
@@ -39,13 +39,10 @@ $COMPOSE run --rm backend php artisan migrate --force
 echo "→ Redémarrage des conteneurs..."
 $COMPOSE up -d --remove-orphans
 
-# Restart nginx too: it resolves the "backend" hostname to a Docker network IP
-# only once at its own startup. When "backend" is recreated above, it gets a
-# new IP, and nginx would keep proxying to the stale one (site-wide 502) until
-# it is restarted itself.
+# Restart nginx
 $COMPOSE restart nginx
 
-# Wait for PHP-FPM to be ready
+# Wait for PHP-FPM
 sleep 8
 
 # 6. Cache and optimizations
@@ -74,6 +71,6 @@ else
 fi
 
 echo ""
-echo "✅  Production deployed successfully !"
+echo "Production deployed successfully !"
 echo "URL : ${PROD_URL:-https://gauthierfitness.fr}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

@@ -1,7 +1,6 @@
 # ════════════════════════════════════════════════════════════════════
 #  GauthierFitness - Production override
 #  Usage : docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-#  Do not redefine images here : docker-compose.yml already has the right names
 # ════════════════════════════════════════════════════════════════════
 
 services:
