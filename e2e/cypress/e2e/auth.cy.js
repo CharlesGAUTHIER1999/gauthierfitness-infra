@@ -1,21 +1,21 @@
 /// <reference types="cypress" />
 
-describe('Authentification', () => {
+describe('Authentication', () => {
 
-    it("la page d'accueil charge correctement", () => {
+    it("the home page loads correctly", () => {
         cy.visit('/');
         cy.title().should('match', /Gauthier/i);
         cy.get('body').should('be.visible');
     });
 
-    it('la page de connexion est accessible', () => {
+    it('the login page is accessible', () => {
         cy.visit('/login');
         cy.findByRole('heading', {name: /connexion|login/i}).should('be.visible');
         cy.findByLabelText(/email/i).should('be.visible');
         cy.findByLabelText(/mot de passe|password/i).should('be.visible');
     });
 
-    it('connexion avec identifiants incorrects affiche une erreur', () => {
+    it('login with incorrect credentials shows an error', () => {
         cy.visit('/login');
         cy.findByLabelText(/email/i).type('wrong@example.com');
         cy.findByLabelText(/mot de passe|password/i).type('wrongpassword', {log: false});
@@ -25,7 +25,7 @@ describe('Authentification', () => {
             .should('be.visible');
     });
 
-    it("connexion avec bons identifiants redirige vers l'espace client", () => {
+    it("login with correct credentials redirects to the account area", () => {
         cy.intercept('POST', '**/api/login').as('loginRequest');
         cy.visit('/login');
         cy.findByLabelText(/email/i).type(Cypress.env('TEST_USER_EMAIL'));
@@ -35,13 +35,13 @@ describe('Authentification', () => {
         cy.url({timeout: 10000}).should('match', /(profile|account|boutique|shop|\/)/);
     });
 
-    it("la page d'inscription est accessible", () => {
+    it("the register page is accessible", () => {
         cy.visit('/register');
         cy.findByLabelText(/email/i).should('be.visible');
         cy.findAllByLabelText(/mot de passe|password/i).first().should('be.visible');
     });
 
-    it('inscription avec email déjà utilisé affiche une erreur', () => {
+    it('register with an already-used email shows an error', () => {
         cy.visit('/register');
         cy.findAllByLabelText(/prénom|nom|name/i).each(($el) => cy.wrap($el).type('Test'));
         cy.findByLabelText(/email/i).type(Cypress.env('TEST_USER_EMAIL'));
@@ -58,7 +58,7 @@ describe('Authentification', () => {
             .should('be.visible');
     });
 
-    it('déconnexion fonctionne', () => {
+    it('logout works', () => {
         cy.loginAsUser();
         cy.visit('/account');
 

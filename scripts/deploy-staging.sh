@@ -22,7 +22,7 @@ echo "→ Git pull (develop)..."
 git pull origin develop
 
 # 2. Pull Docker images
-echo "→ Pull des images (tag: ${IMAGE_TAG:-latest})..."
+echo "→ Pulling images (tag: ${IMAGE_TAG:-latest})..."
 export IMAGE_TAG="${IMAGE_TAG:-latest}"
 $COMPOSE pull
 
@@ -31,7 +31,7 @@ echo "→ Migrations Laravel..."
 $COMPOSE run --rm backend php artisan migrate --force
 
 # 4. Restart services
-echo "→ Redémarrage des conteneurs..."
+echo "→ Restarting containers..."
 $COMPOSE up -d --remove-orphans
 
 # Restart nginx

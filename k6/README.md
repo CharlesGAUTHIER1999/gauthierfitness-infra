@@ -1,30 +1,28 @@
-# Tests de performance (k6)
+# Performance tests (k6)
 
-Charge sur les mêmes endpoints de lecture publics que l'ancienne simulation
-Gatling (health check, liste produits, détail produit, panier invité) -
-volontairement sans écriture (pas de register/login/paiement) pour ne pas
-polluer un environnement partagé.
+Load on the same public read endpoints as the old Gatling simulation
+(health check, product list, product detail, guest cart) - deliberately
+no writes (no register/login/payment) to avoid polluting a shared
+environment.
 
-Cible : p95 des temps de réponse < 300 ms, < 1 % de requêtes en échec.
+Target: p95 response time < 300 ms, < 1% failed requests.
 
-Remplace `infra/gatling` : les mesures Gatling (client JVM/Netty) étaient
-bruitées par le démarrage du moteur et non représentatives de la performance
-réelle du serveur. k6, sans JVM, donne une mesure fiable - confirmé en
-croisant les deux sur le même run (voir historique du projet).
+Replaces `infra/gatling`: Gatling measurements (JVM/Netty client) were
+noisy due to engine startup
 
-## Lancer le test
+## Running the test
 
-Nécessite [k6](https://k6.io/) installé (`winget install k6` sous Windows).
+Requires [k6](https://k6.io/) installed (`winget install k6` on Windows).
 
 ```bash
-# Contre le staging (chiffre représentatif)
+# Against staging
 k6 run infra/k6/api-load-test.js
 
-# Contre un backend local
+# Against local backend
 BASE_URL=http://localhost:8000 k6 run infra/k6/api-load-test.js
 ```
 
-Sous PowerShell, définir la variable d'environnement séparément :
+On PowerShell, set the environment variable separately:
 
 ```powershell
 $env:BASE_URL = "https://api-staging.gauthierfitness.fr"
@@ -32,6 +30,8 @@ k6 run infra/k6/api-load-test.js
 ```
 
 ## Note
-Les résultats dépendent de la charge de la cible au moment du test. Pour un
-chiffre qui a du sens dans la documentation RNCP, lancez-le contre le staging
-(ou la prod hors heures de trafic), pas contre un poste de dev chargé.
+
+Results depend on the target's load at the time of the test. For a
+figure that makes sense in the RNCP documentation, run it against
+staging (or production outside traffic hours), not against a loaded
+dev machine.

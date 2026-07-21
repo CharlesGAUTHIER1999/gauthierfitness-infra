@@ -1,36 +1,42 @@
 ---
 name: Bug report
-about: Signalement d'une anomalie détectée sur GauthierFitness
+about: Report a bug detected on GauthierFitness
 title: "[BUG] "
 labels: bug
 ---
 
-## Contexte
-- Environnement : <!-- production / staging / local -->
-- Version / commit : <!-- tag ou SHA -->
-- Navigateur / OS (si pertinent) : <!-- ex. Chrome 126 / Windows 11 -->
-- Date/heure de l'incident :
+## Context
 
-## Étapes de reproduction
+- Environment: <!-- production / staging / local -->
+- Version / commit: <!-- tag or SHA -->
+- Browser / OS (if relevant): <!-- e.g. Chrome 126 / Windows 11 -->
+- Date/time of the incident:
+
+## Steps to reproduce
+
 1.
 2.
 3.
 
-## Comportement attendu
+## Expected behavior
 
-## Comportement observé
+## Observed behavior
 
-## Impact utilisateur
-<!-- Qui est affecté, combien d'utilisateurs, données ou paiement en jeu ? -->
+## User impact
 
-## Gravité
-- [ ] S1 — Critique (prod indisponible, sécurité ou paiement compromis)
-- [ ] S2 — Majeure (fonctionnalité clé cassée, pas de contournement simple)
-- [ ] S3 — Mineure (fonctionnalité secondaire, contournement possible)
-- [ ] S4 — Cosmétique
+<!-- Who is affected, how many users, is data or payment involved? -->
 
-## Analyse / cause racine
-<!-- Rempli après investigation -->
+## Severity
 
-## Correctif proposé / appliqué
-<!-- Lien PR, description du fix, tests de non-régression ajoutés -->
+- [ ] S1 — Critical (prod unavailable, security or payment compromised)
+- [ ] S2 — Major (key feature broken, no simple workaround)
+- [ ] S3 — Minor (secondary feature, workaround possible)
+- [ ] S4 — Cosmetic
+
+## Analysis / root cause
+
+<!-- Filled in after investigation -->
+
+## Proposed / applied fix
+
+<!-- PR link, fix description, regression tests added -->
