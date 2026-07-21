@@ -12,7 +12,7 @@ COMPOSE="docker compose -f docker-compose.yml -f docker-compose.prod.yml"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "  GauthierFitness - Production Deployment"
 echo "  Image tag : ${IMAGE_TAG:-latest}"
-echo "  Déclenché par : ${GITHUB_ACTOR:-unknown}"
+echo "  Triggered by : ${GITHUB_ACTOR:-unknown}"
 echo "  Date : $(date '+%Y-%m-%d %H:%M:%S')"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
@@ -23,20 +23,20 @@ echo "→ Git pull (main)..."
 git pull origin main
 
 # 2. Pull images
-echo "→ Pull des images Docker..."
+echo "→ Pulling Docker images..."
 export IMAGE_TAG="${IMAGE_TAG:-latest}"
 $COMPOSE pull
 
 # 3. Maintenance mode
-echo "→ Mode maintenance activé..."
+echo "→ Maintenance mode enabled..."
 $COMPOSE exec -T backend php artisan down --retry=5 || true
 
 # 4. Migrations
-echo "→ Migrations Laravel..."
+echo "→ Laravel migrations..."
 $COMPOSE run --rm backend php artisan migrate --force
 
 # 5. Restart
-echo "→ Redémarrage des conteneurs..."
+echo "→ Restarting containers..."
 $COMPOSE up -d --remove-orphans
 
 # Restart nginx
@@ -46,18 +46,18 @@ $COMPOSE restart nginx
 sleep 8
 
 # 6. Cache and optimizations
-echo "→ Optimisations Laravel..."
+echo "→ Laravel optimizations..."
 $COMPOSE exec -T backend php artisan config:cache
 $COMPOSE exec -T backend php artisan route:cache
 $COMPOSE exec -T backend php artisan view:cache
 $COMPOSE exec -T backend php artisan event:cache
 
 # 7. Back online
-echo "→ Désactivation du mode maintenance..."
+echo "→ Disabling maintenance mode..."
 $COMPOSE exec -T backend php artisan up
 
 # 8. Clean up
-echo "→ Nettoyage images Docker..."
+echo "→ Cleaning up Docker images..."
 docker image prune -f
 
 # 9. Health check
@@ -67,7 +67,7 @@ HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${PROD_URL:-https://gauthi
 if [ "$HTTP_STATUS" = "200" ]; then
   echo "Health check OK (HTTP $HTTP_STATUS)"
 else
-  echo "Health check returned HTTP $HTTP_STATUS (vérifier manuellement)"
+  echo "Health check returned HTTP $HTTP_STATUS (check manually)"
 fi
 
 echo ""

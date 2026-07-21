@@ -1,60 +1,82 @@
 # Changelog
 
-Toutes les évolutions notables de l'infrastructure GauthierFitness sont documentées ici.
+All notable changes to the GauthierFitness infrastructure are documented here.
 
-Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/).
+Format inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [v1.1.2] - 2026-07-13
 
 ### Fixed
-- `deploy.yml` : le déploiement staging/prod échouait (`ssh: unable to authenticate`) après la mise à jour groupée des actions GitHub — `appleboy/scp-action` était passé de v0.1.7 à v1.0.0 (bump majeur caché dans le groupe), rendant invalide le chemin codé en dur `/github/runner_temp/{staging,prod}_key` utilisé pour la clé SSH. Remplacé par `${{ runner.temp }}/{staging,prod}_key`, cohérent avec ce qu'utilisait déjà l'étape `appleboy/ssh-action` voisine. Vérifié par un déploiement staging réel + suite E2E Cypress complète, les deux au vert.
+
+- `deploy.yml`: staging/prod deployment was failing (`ssh: unable to authenticate`) after the grouped GitHub Actions
+  update — `appleboy/scp-action` had been bumped from v0.1.7 to v1.0.0 (a major bump hidden inside the group),
+  invalidating the hardcoded `/github/runner_temp/{staging,prod}_key` path used for the SSH key. Replaced with
+  `${{ runner.temp }}/{staging,prod}_key`, consistent with what the neighboring `appleboy/ssh-action` step already used.
+  Verified with a real staging deployment + full Cypress E2E suite, both green.
 
 ## [v1.1.1] - 2026-07-13
 
 ### Fixed
-- `security-scan.yml` : permission `issues: write` manquante empêchait `zaproxy/action-baseline` de consigner ses résultats sur GitHub Issues, faisant échouer le job même quand le scan lui-même ne relevait aucune faille bloquante (`FAIL-NEW: 0`). Vérifié en conditions réelles : le scan tourne désormais au vert et l'issue est bien créée.
+
+- `security-scan.yml`: a missing `issues: write` permission prevented `zaproxy/action-baseline` from logging its results
+  to GitHub Issues, failing the job even when the scan itself found no blocking issue (`FAIL-NEW: 0`). Verified under
+  real conditions: the scan now runs green and the issue is created correctly.
 
 ### Changed
-- Mise à jour des actions GitHub utilisées en CI/CD groupées par Dependabot (7 mises à jour).
+
+- Updated the GitHub Actions used in CI/CD, grouped by Dependabot (7 updates).
 
 ## [v1.1.0] - 2026-07-12
 
 ### Added
-- Sauvegarde quotidienne chiffrée de la base MySQL (`scripts/backup-db.sh`, GPG) et script de test de restauration mensuel (`scripts/restore-db-test.sh`).
+
+- Daily encrypted backup of the MySQL database (`scripts/backup-db.sh`, GPG) and a monthly restore test script (
+  `scripts/restore-db-test.sh`).
 
 ### Changed
-- `deploy.yml` synchronise désormais `backup-db.sh` sur le VPS à chaque déploiement.
-- Commentaires et scripts infra traduits en anglais (`.gitignore`, `.env.*.example`, configs Nginx, scripts de backup/restauration).
+
+- `deploy.yml` now syncs `backup-db.sh` to the VPS on every deployment.
+- Translated infra comments and scripts to English (`.gitignore`, `.env.*.example`, Nginx configs, backup/restore
+  scripts).
 
 ### Fixed
-- `restore-db-test.sh` : évite une race condition avec le redémarrage interne de MySQL au premier lancement (exige deux pings positifs consécutifs).
+
+- `restore-db-test.sh`: avoids a race condition with MySQL's internal restart on first launch (requires two consecutive
+  successful pings).
 
 ## [v1.0.1] - 2026-07-10
 
 ### Fixed
-- CSP : ajout de `wasm-unsafe-eval` et `blob:` pour débloquer le configurateur 3D (page blanche en production, voir Fiche d'incident 8).
-- Nginx : `fastcgi_read_timeout` relevé à 200s pour aligner le proxy sur le timeout réel de la génération IA (voir Fiche d'incident 9).
+
+- CSP: added `wasm-unsafe-eval` and `blob:` to unblock the 3D configurator (blank page in production, see Incident
+  Report 8).
+- Nginx: raised `fastcgi_read_timeout` to 200s to align the proxy with the actual timeout of AI generation (see Incident
+  Report 9).
 
 ## [v1.0.0] - 2026-07-08
 
-Première release taguée de l'infra. Pipeline de déploiement continu complet pour le staging et la production sur
-2 VPS OVH (Docker, Nginx, Let's Encrypt), avec suite de tests E2E, scan de sécurité et supervision.
+First tagged release of the infra. Full continuous deployment pipeline for staging and production on
+2 OVH VPS (Docker, Nginx, Let's Encrypt), with an E2E test suite, security scan, and monitoring.
 
 ### Added
-- Pipeline CI/CD (GitHub Actions), orchestration Docker (`docker-compose.yml` / `.staging.yml` / `.prod.yml`).
-- Suite de tests E2E Cypress, incluant le parcours d'achat complet.
-- Scan de sécurité OWASP ZAP et tests de charge Gatling.
-- Supervision uptime de la production.
+
+- CI/CD pipeline (GitHub Actions), Docker orchestration (`docker-compose.yml` / `.staging.yml` / `.prod.yml`).
+- Cypress E2E test suite, including the full purchase journey.
+- OWASP ZAP security scan and Gatling load tests.
+- Production uptime monitoring.
 - Dependabot (GitHub Actions, npm E2E).
 
 ### Changed
-- Nginx : configuration HTTPS (Let's Encrypt) pour le front et le sous-domaine API, en staging et en production.
-- Déploiement prod : option de déploiement ciblé (prod-only), correctifs SCP/SSH (clé au format base64, permissions,
-  chemin runner) pour fiabiliser la connexion aux VPS.
+
+- Nginx: HTTPS configuration (Let's Encrypt) for frontend and API subdomain, in staging and production.
+- Prod deployment : targeted deployment option (prod-only), SCP/SSH fixes (base64-encoded key, permissions,
+  runner path) to make VPS connection more reliable.
 
 ### Security
-- Fermeture du port MySQL exposé sur le VPS suite à l'incident ransomware de staging (mai 2026) : durcissement des
-  2 VPS (SSH clé uniquement, ufw, DB non exposée publiquement).
+
+- Closed MySQL port exposed on VPS following staging ransomware incident (May 2026) : hardened
+  both VPS (SSH key-only, ufw, DB not publicly exposed).
 
 ### Fixed
-- Alias de stockage Nginx, routage Sanctum, variable `DB_HOST`, étape SCP du déploiement.
+
+- Nginx storage alias, Sanctum routing, `DB_HOST` variable, deployment SCP step.

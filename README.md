@@ -1,176 +1,176 @@
 # GauthierFitness - Infra
 
-> Orchestration Docker, configurations Nginx, scripts de déploiement et tests E2E pour les environnements **staging** et
-**production** de GauthierFitness.
+> Docker orchestration, Nginx configurations, deployment scripts, and E2E tests for GauthierFitness's **staging** and
+**production** environments.
 
-Repo : `CharlesGAUTHIER1999/gauthierfitness-infra` &nbsp; &nbsp; Déploiements vers : `staging.gauthierfitness.fr` et
+Repo: `CharlesGAUTHIER1999/gauthierfitness-infra` &nbsp; &nbsp; Deploys to: `staging.gauthierfitness.fr` and
 `gauthierfitness.fr`
 
-> Documentation projet transverse (architecture, manuel utilisateur, mise à jour) : [meta-repo
+> Cross-project documentation (architecture, user manual, upgrades): [meta-repo
 `gauthierfitness/docs`](https://github.com/CharlesGAUTHIER1999/gauthierfitness/tree/main/docs)
 
 ---
 
-## Rôle du répertoire
+## Role of this directory
 
-| Composant                      | Rôle                                                                      |
-|--------------------------------|---------------------------------------------------------------------------|
-| `docker-compose.yml`           | Stack complète : nginx, backend, frontend, db, redis, queue worker (base) |
-| `docker-compose.staging.yml`   | Override staging (HTTPS, domaines staging)                                |
-| `docker-compose.prod.yml`      | Override prod (HTTPS, domaines prod)                                      |
-| `nginx/`                       | Configs Nginx : `nginx.conf` (base), `staging.conf`, `prod.conf`          |
-| `scripts/`                     | `deploy-staging.sh`, `deploy-prod.sh` - exécutés via SSH sur les VPS      |
-| `e2e/`                         | Tests Cypress joués contre le staging après chaque déploiement            |
-| `.github/workflows/deploy.yml` | Pipeline complet : Deploy Staging -> E2E -> Deploy Prod                   |
+| Component                      | Role                                                                 |
+|--------------------------------|----------------------------------------------------------------------|
+| `docker-compose.yml`           | Full stack: nginx, backend, frontend, db, redis, queue worker (base) |
+| `docker-compose.staging.yml`   | Staging override (HTTPS, staging domains)                            |
+| `docker-compose.prod.yml`      | Production override (HTTPS, prod domains)                            |
+| `nginx/`                       | Nginx configs: `nginx.conf` (base), `staging.conf`, `prod.conf`      |
+| `scripts/`                     | `deploy-staging.sh`, `deploy-prod.sh` - run via SSH on the VPS       |
+| `e2e/`                         | Cypress tests run against staging after each deployment              |
+| `.github/workflows/deploy.yml` | Full pipeline: Deploy Staging -> E2E -> Deploy Prod                  |
 
-Les images Docker du backend et du frontend sont **buildées par leurs CI respectives** (cf. `gauthierfitness-backend` et
-`gauthierfitness-frontend`) et publiées sur GHCR. Ce repo ne build aucune image lui-même, il les **orchestre**.
+The backend and frontend Docker images are **built by their own respective CIs** (see `gauthierfitness-backend` and
+`gauthierfitness-frontend`) and published to GHCR. This repo doesn't build any image itself, it **orchestrates** them.
 
 ---
 
 ## Stack
 
-| Couche            | Technologie                                                          |
-|-------------------|----------------------------------------------------------------------|
-| Conteneurisation  | Docker + Docker Compose v2                                           |
-| Reverse proxy     | Nginx Alpine 1.27                                                    |
-| Base de données   | MySQL 8                                                              |
-| Cache / Queue     | Redis 7                                                              |
-| Hébergement       | 2 VPS OVH (staging + production)                                     |
-| Registry          | GHCR (GitHub Container Registry)                                     |
-| CI/CD             | GitHub Actions (déclenché manuellement ou via `repository_dispatch`) |
-| TLS               | Let's Encrypt (Certbot, renouvellement auto)                         |
-| Tests post-deploy | Cypress (Chrome)                                                     |
+| Layer             | Technology                                                       |
+|-------------------|------------------------------------------------------------------|
+| Containerization  | Docker + Docker Compose v2                                       |
+| Reverse proxy     | Nginx Alpine 1.27                                                |
+| Database          | MySQL 8                                                          |
+| Cache / Queue     | Redis 7                                                          |
+| Hosting           | 2 OVH VPS (staging + production)                                 |
+| Registry          | GHCR (GitHub Container Registry)                                 |
+| CI/CD             | GitHub Actions (triggered manually or via `repository_dispatch`) |
+| TLS               | Let's Encrypt (Certbot, auto-renewal)                            |
+| Post-deploy tests | Cypress (Chrome)                                                 |
 
 ---
 
-## Démarrage local (test du compose en isolation)
+## Local setup (testing the compose stack in isolation)
 
 ```bash
-cp .env.example .env       # remplir les secrets
+cp .env.example .env       # fill in the secrets
 docker compose -f docker-compose.yml up -d
 docker compose logs -f nginx
 ```
 
-Stack accessible sur `http://localhost`. Pour le dev applicatif quotidien, mieux vaut lancer le backend et le frontend *
-*hors Docker** (cf. leurs READMEs).
+Stack available at `http://localhost`. For day-to-day app development, it's better to run the backend and frontend
+**outside Docker** (see their READMEs).
 
 ---
 
-## Pipeline de déploiement
+## Deployment pipeline
 
 ```
               +---------------------------------------------------------+
-              | Trigger : workflow_dispatch (manuel) ou                 |
-              |           repository_dispatch (depuis backend/frontend) |
+              | Trigger: workflow_dispatch (manual) or                  |
+              |          repository_dispatch (from backend/frontend)    |
               +-------------------------+-------------------------------+
                                         |
                                         v
               +---------------------------------------------------------+
               | JOB 1 - Deploy Staging                                  |
-              |  * SCP compose + nginx -> VPS staging                   |
-              |  * SSH : docker login GHCR -> pull -> migrate -> up -d  |
-              |  * Re-cache config/route/view Laravel                   |
+              |  * SCP compose + nginx -> staging VPS                   |
+              |  * SSH: docker login GHCR -> pull -> migrate -> up -d   |
+              |  * Re-cache Laravel config/route/view                  |
               +-------------------------+-------------------------------+
                                         |
                                         v
               +---------------------------------------------------------+
-              | JOB 2 - Tests E2E Cypress                               |
-              |  * Joue les specs e2e/cypress/e2e/ contre staging       |
-              |  * Upload screenshots/vidéos en artifact si échec       |
+              | JOB 2 - Cypress E2E Tests                               |
+              |  * Runs the e2e/cypress/e2e/ specs against staging      |
+              |  * Uploads screenshots/videos as artifact on failure     |
               +-------------------------+-------------------------------+
                                         |
-                                        v (gate manuelle ou paramètre both/prod-only)
+                                        v (manual gate, or both/prod-only parameter)
               +---------------------------------------------------------+
               | JOB 3 - Deploy Production                               |
-              |  * Idem job 1 mais sur VPS prod + docker-compose.prod   |
+              |  * Same as job 1 but on the prod VPS + docker-compose.prod |
               |  * artisan down -> migrate -> up -d -> cache -> up      |
               +---------------------------------------------------------+
 ```
 
-Workflow : [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
+Workflow: [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
 
-### Déclenchement manuel
+### Manual trigger
 
-GitHub UI -> onglet **Actions** -> workflow **Deploy Pipeline** -> **Run workflow** :
+GitHub UI → **Actions** tab → **Deploy Pipeline** workflow → **Run workflow**:
 
-| Input         | Valeur typique                                                               |
-|---------------|------------------------------------------------------------------------------|
-| `image_tag`   | `latest` (= dernier `main`), `develop`, ou un sha court (`abc1234`)          |
-| `environment` | `staging` (défaut) - `prod-only` (skip staging+e2e) - `both` (enchaîne tout) |
+| Input         | Typical value                                                                     |
+|---------------|-----------------------------------------------------------------------------------|
+| `image_tag`   | `latest` (= latest `main`), `develop`, or a short sha (`abc1234`)                 |
+| `environment` | `staging` (default) - `prod-only` (skip staging+e2e) - `both` (chains everything) |
 
-### Déclenchement automatique
+### Automatic trigger
 
-Les CI backend et frontend, à chaque push sur `develop`, envoient un `repository_dispatch` de type `deploy-staging` vers
-ce repo -> Jobs 1 + 2 enchaînés automatiquement. Pas de prod automatique.
+The backend and frontend CIs, on every push to `develop`, send a `repository_dispatch` of type `deploy-staging` to
+this repo -> Jobs 1 + 2 chain automatically. No automatic production deploy.
 
 ---
 
-## Tests E2E (Cypress)
+## E2E Tests (Cypress)
 
 ```bash
 cd e2e
 npm install
-BASE_URL=http://localhost npx cypress open                        # contre le compose local
-BASE_URL=https://staging.gauthierfitness.fr npx cypress run        # contre staging (headless)
+BASE_URL=http://localhost npx cypress open  # against local compose stack
+BASE_URL=https://staging.gauthierfitness.fr npx cypress run # against staging
 ```
 
-Specs disponibles dans `e2e/cypress/e2e/` : `auth.cy.js`, `admin.cy.js`, `admin-stock.cy.js`, `purchase-journey.cy.js`.
-Le `package-lock.json` doit être **commité** dans `e2e/` - sans lui, le job CI plante (`setup-node` exige le lockfile
-pour calculer la cache key, et `npm ci` l'exige aussi).
-En cas d'échec, screenshots et vidéos sont générés dans `e2e/cypress/screenshots/` et `e2e/cypress/videos/`
-(gitignorés) puis uploadés en artifact GitHub par la CI.
+Specs available in `e2e/cypress/e2e/`: `auth.cy.js`, `admin.cy.js`, `admin-stock.cy.js`, `purchase-journey.cy.js`.
+`package-lock.json` must be **committed** in `e2e/` - without it, the CI job breaks (`setup-node` requires the lockfile
+to compute the cache key, and `npm ci` requires it too).
+On failure, screenshots and videos are generated in `e2e/cypress/screenshots/` and `e2e/cypress/videos/`
+(gitignored) then uploaded as a GitHub artifact by CI.
 
 ---
 
-## VPS - durcissement et accès
+## VPS - hardening and access
 
-Suite à l'incident ransomware staging de mai 2026, les deux VPS sont durcis :
+Following the staging ransomware incident of May 2026, both VPS are hardened :
 
-- **SSH** : clé uniquement (`PasswordAuthentication no`, `PermitRootLogin no`), port non standard.
-- **UFW** : seuls 22 (port custom SSH), 80 (redirect HTTPS) et 443 ouverts.
-- **MySQL** : **jamais exposé** depuis l'extérieur. Accessible uniquement via le réseau Docker `gf_network`. Pour debug
-  ponctuel : tunnel SSH (`ssh -L 3306:localhost:3306 ...`).
-- **Backups** : dump MySQL chiffré GPG, quotidien, copie hors-VPS.
+- **SSH**: key-only (`PasswordAuthentication no`, `PermitRootLogin no`), non-standard port.
+- **UFW**: only 22 (custom SSH port), 80 (HTTPS redirect), and 443 open.
+- **MySQL**: **never exposed** externally. Accessible only via the `gf_network` Docker network. For occasional
+  debugging: SSH tunnel (`ssh -L 3306:localhost:3306 ...`).
+- **Backups**: GPG-encrypted MySQL dump, daily, copied off-VPS.
 
-Détail : [docs/02-deployment.md § 8](https://github.com/CharlesGAUTHIER1999/gauthierfitness/blob/main/docs/02-deployment.md#8-sécurité-serveur-durcissement).
-
----
-
-## Secrets GitHub Actions requis
-
-| Secret                                     | Usage                                  |
-|--------------------------------------------|----------------------------------------|
-| `STAGING_SSH_HOST` / `PROD_SSH_HOST`       | IP / hostname des VPS                  |
-| `STAGING_SSH_USER` / `PROD_SSH_USER`       | Utilisateur SSH (non-root)             |
-| `STAGING_SSH_PORT` / `PROD_SSH_PORT`       | Port SSH custom                        |
-| `STAGING_SSH_KEY` / `PROD_SSH_KEY`         | Clé privée SSH **base64-encoded**      |
-| `GHCR_TOKEN`                               | PAT pour `docker login ghcr.io`        |
-| `TEST_ADMIN_EMAIL` / `TEST_ADMIN_PASSWORD` | Compte admin de test E2E (sur staging) |
-| `TEST_USER_EMAIL` / `TEST_USER_PASSWORD`   | Compte user de test E2E                |
-
-Et les **variables** (non-secret) : `STAGING_URL`, `PROD_URL`.
+Details: [docs/02-deployment.md § 8](https://github.com/CharlesGAUTHIER1999/gauthierfitness/blob/main/docs/02-deployment.md#8-sécurité-serveur-durcissement).
 
 ---
 
-## Convention de branchage
+## Required GitHub Actions secrets
 
-Multi-repo, mais pour **ce repo** la convention diffère légèrement des repos applicatifs : pas de branches feature
-`GF{n}-...`, juste `develop` -> `main`.
+| Secret                                     | Use                                 |
+|--------------------------------------------|-------------------------------------|
+| `STAGING_SSH_HOST` / `PROD_SSH_HOST`       | VPS IP / hostname                   |
+| `STAGING_SSH_USER` / `PROD_SSH_USER`       | SSH user (non-root)                 |
+| `STAGING_SSH_PORT` / `PROD_SSH_PORT`       | Custom SSH port                     |
+| `STAGING_SSH_KEY` / `PROD_SSH_KEY`         | **base64-encoded** SSH private key  |
+| `GHCR_TOKEN`                               | PAT for `docker login ghcr.io`      |
+| `TEST_ADMIN_EMAIL` / `TEST_ADMIN_PASSWORD` | E2E test admin account (on staging) |
+| `TEST_USER_EMAIL` / `TEST_USER_PASSWORD`   | E2E test user account               |
 
-- `develop` : itérations courantes
-- `main` : configuration appliquée en prod (PR depuis develop)
-
-Les commits sont étiquetés `hotfix:`, `fix:`, `chore:`, `prod:` selon le sujet.
+Plus the (non-secret) **variables**: `STAGING_URL`, `PROD_URL`.
 
 ---
 
-## Liens utiles
+## Branching convention
 
-- [Manuel de déploiement complet](https://github.com/CharlesGAUTHIER1999/gauthierfitness/blob/main/docs/02-deployment.md)
-- [Manuel de mise à jour](https://github.com/CharlesGAUTHIER1999/gauthierfitness/blob/main/docs/04-upgrade.md)
-- [Manuel d'utilisation](https://github.com/CharlesGAUTHIER1999/gauthierfitness/blob/main/docs/03-user-guide.md)
-- [Architecture détaillée](https://github.com/CharlesGAUTHIER1999/gauthierfitness/blob/main/docs/01-architecture.md)
-- [Documentation API Rest](https://github.com/CharlesGAUTHIER1999/gauthierfitness/blob/main/docs/05-api.md)
-- [Repo backend détaillé](https://github.com/CharlesGAUTHIER1999/gauthierfitness-backend)
-- [Repo frontend](https://github.com/CharlesGAUTHIER1999/gauthierfitness-frontend)
+Multi-repo, but for **this repo** the convention differs slightly from the app repos: no `GF{n}-...` feature
+branches, just `develop` -> `main`.
+
+- `develop`: ongoing iterations
+- `main`: config applied in production (PR from develop)
+
+Commits are tagged `hotfix:`, `fix:`, `chore:`, `prod:` depending on the subject.
+
+---
+
+## Useful links
+
+- [Full deployment manual](https://github.com/CharlesGAUTHIER1999/gauthierfitness/blob/main/docs/02-deployment.md)
+- [Upgrade manual](https://github.com/CharlesGAUTHIER1999/gauthierfitness/blob/main/docs/04-upgrade.md)
+- [User guide](https://github.com/CharlesGAUTHIER1999/gauthierfitness/blob/main/docs/03-user-guide.md)
+- [Detailed architecture](https://github.com/CharlesGAUTHIER1999/gauthierfitness/blob/main/docs/01-architecture.md)
+- [REST API documentation](https://github.com/CharlesGAUTHIER1999/gauthierfitness/blob/main/docs/05-api.md)
+- [Detailed backend repo](https://github.com/CharlesGAUTHIER1999/gauthierfitness-backend)
+- [Frontend repo](https://github.com/CharlesGAUTHIER1999/gauthierfitness-frontend)

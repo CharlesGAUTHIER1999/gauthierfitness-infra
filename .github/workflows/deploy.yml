@@ -17,11 +17,11 @@ on:
   workflow_dispatch:
     inputs:
       image_tag:
-        description: "Tag de l'image Docker (ex: latest, develop, sha-abc123)"
+        description: "Docker image tag (e.g. latest, develop, sha-abc123)"
         required: true
         default: "develop"
       environment:
-        description: "Cible de déploiement"
+        description: "Deployment target"
         required: true
         default: "staging"
         type: choice
@@ -54,12 +54,12 @@ jobs:
       - name: Checkout infra
         uses: actions/checkout@v7
 
-      - name: Préparer la clé SSH
+      - name: Prepare SSH key
         run: |
           echo "${{ secrets.STAGING_SSH_KEY }}" | base64 -d > $RUNNER_TEMP/staging_key
           chmod 644 $RUNNER_TEMP/staging_key
 
-      - name: Copier docker-compose + nginx vers VPS
+      - name: Copy docker-compose + nginx to VPS
         uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.STAGING_SSH_HOST }}
@@ -119,7 +119,7 @@ jobs:
   # JOB 2 - Cypress E2E tests
   # ---------------------------
   e2e:
-    name: "Tests E2E Cypress"
+    name: "Cypress E2E Tests"
     runs-on: ubuntu-latest
     needs: deploy-staging
     if: needs.deploy-staging.result == 'success'
@@ -149,7 +149,7 @@ jobs:
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
           TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
 
-      - name: Upload screenshots si échec
+      - name: Upload screenshots on failure
         uses: actions/upload-artifact@v7
         if: failure()
         with:
@@ -157,7 +157,7 @@ jobs:
           path: e2e/cypress/screenshots/
           retention-days: 30
 
-      - name: Upload vidéos
+      - name: Upload videos
         uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -193,12 +193,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Préparer la clé SSH
+      - name: Prepare SSH key
         run: |
           echo "${{ secrets.PROD_SSH_KEY }}" | base64 -d > $RUNNER_TEMP/prod_key
           chmod 644 $RUNNER_TEMP/prod_key
 
-      - name: Copier fichiers vers VPS prod
+      - name: Copy files to prod VPS
         uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.PROD_SSH_HOST }}
