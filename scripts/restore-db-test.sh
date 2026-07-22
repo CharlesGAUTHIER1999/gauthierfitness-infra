@@ -23,7 +23,7 @@ trap 'rm -rf "$WORKDIR"' EXIT
 
 echo "→ Looking up the latest backup for ${TARGET} (hostname: ${HOST_FILTER})..."
 LATEST_KEY=$(AWS_ACCESS_KEY_ID="$OVH_S3_ACCESS_KEY" AWS_SECRET_ACCESS_KEY="$OVH_S3_SECRET_KEY" \
-  aws s3api list-objects-v2 --bucket "$OVH_S3_BUCKET" --prefix "db-backups/gauthier_fitness_${TARGET}" \
+  aws s3api list-objects-v2 --bucket "$OVH_S3_BUCKET" --prefix "db-backups/gauthier_fitness_${HOST_FILTER}" \
   --endpoint-url "$OVH_S3_ENDPOINT" --query "sort_by(Contents,&LastModified)[-1].Key" --output text)
 
 if [ -z "$LATEST_KEY" ] || [ "$LATEST_KEY" = "None" ]; then

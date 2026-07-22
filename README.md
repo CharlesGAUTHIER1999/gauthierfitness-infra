@@ -15,7 +15,7 @@ Repo: `CharlesGAUTHIER1999/gauthierfitness-infra` &nbsp; &nbsp; Deploys to: `sta
 
 | Component                      | Role                                                                 |
 |--------------------------------|----------------------------------------------------------------------|
-| `docker-compose.yml`           | Full stack: nginx, backend, frontend, db, redis, queue worker (base) |
+| `docker-compose.yml`           | Full stack: nginx, backend, frontend, db, redis, queue worker, scheduler (base) |
 | `docker-compose.staging.yml`   | Staging override (HTTPS, staging domains)                            |
 | `docker-compose.prod.yml`      | Production override (HTTPS, prod domains)                            |
 | `nginx/`                       | Nginx configs: `nginx.conf` (base), `staging.conf`, `prod.conf`      |
