@@ -1,24 +1,24 @@
-# ─── Secrets & env ───────────────────────────────────────────────
+# Secrets & env
 .env
 .env.local
 .env.staging
 .env.production
 *.env
 
-# ─── Node ────────────────────────────────────────────────────────
+# Node
 node_modules/
 e2e/node_modules/
 frontend/node_modules/
 
-# ─── Build outputs ───────────────────────────────────────────────
+# Build outputs
 frontend/dist/
 
-# ─── Cypress artifacts ───────────────────────────────────────────
+# Cypress artifacts
 e2e/cypress/screenshots/
 e2e/cypress/videos/
 e2e/cypress/downloads/
 
-# ─── PHP / Composer ──────────────────────────────────────────────
+# PHP / Composer
 backend/vendor/
 backend/.phpunit.cache/
 backend/storage/logs/*.log
@@ -28,20 +28,20 @@ backend/storage/framework/views/*
 backend/bootstrap/cache/*.php
 !backend/bootstrap/cache/.gitignore
 
-# ─── OS ───────────────────────────────────────────────────────────
+# OS
 .DS_Store
 Thumbs.db
 *.swp
 *.swo
 
-# ─── IDE ──────────────────────────────────────────────────────────
+# IDE
 .idea/
 .vscode/
 *.code-workspace
 
-# ─── Docker ───────────────────────────────────────────────────────
+# Docker
 # docker-compose.*.yml files are committed intentionally
 
-# ─── Logs ─────────────────────────────────────────────────────────
+# Logs
 *.log
 npm-debug.log*

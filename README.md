@@ -133,7 +133,7 @@ Following the staging ransomware incident of May 2026, both VPS are hardened :
   debugging: SSH tunnel (`ssh -L 3306:localhost:3306 ...`).
 - **Backups**: GPG-encrypted MySQL dump, daily, copied off-VPS.
 
-Details: [docs/02-deployment.md § 8](https://github.com/CharlesGAUTHIER1999/gauthierfitness/blob/main/docs/02-deployment.md#8-sécurité-serveur-durcissement).
+Details: [docs/02-deployment.md § 8](https://github.com/CharlesGAUTHIER1999/gauthierfitness/blob/main/docs/02-deployment.md#8-server-security-hardening).
 
 ---
 

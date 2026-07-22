@@ -11,7 +11,7 @@
 
 services:
 
-  # ── Reverse proxy ────────────────────────────────────────────────
+  # Reverse proxy
   nginx:
     image: nginx:1.27-alpine
     container_name: gf_nginx
@@ -27,7 +27,7 @@ services:
       - gf_network
     restart: unless-stopped
 
-  # ── Laravel backend (image built by ci-backend.yml) ──────────────
+  # Laravel backend (image built by ci-backend.yml)
   backend:
     image: ghcr.io/charlesgauthier1999/gauthierfitness-backend:${IMAGE_TAG:-latest}
     container_name: gf_backend
@@ -44,7 +44,7 @@ services:
       - gf_network
     restart: unless-stopped
 
-  # ── React frontend (image built by ci-frontend.yml) ──────────────
+  # React frontend (image built by ci-frontend.yml)
   frontend:
     image: ghcr.io/charlesgauthier1999/gauthierfitness-frontend:${IMAGE_TAG:-latest}
     container_name: gf_frontend
@@ -54,7 +54,7 @@ services:
       - gf_network
     restart: unless-stopped
 
-  # ── MySQL 8 ──────────────────────────────────────────────────────
+  # MySQL 8
   db:
     image: mysql:8.0
     container_name: gf_db
@@ -74,7 +74,7 @@ services:
       - gf_network
     restart: unless-stopped
 
-  # ── Redis ─────────────────────────────────────────────────────────
+  # Redis
   redis:
     image: redis:7-alpine
     container_name: gf_redis
@@ -84,7 +84,7 @@ services:
       - gf_network
     restart: unless-stopped
 
-  # ── Queue worker ─────────────────────────────────────────────────
+  # Queue worker
   queue:
     image: ghcr.io/charlesgauthier1999/gauthierfitness-backend:${IMAGE_TAG:-latest}
     container_name: gf_queue
@@ -100,7 +100,7 @@ services:
       - gf_network
     restart: unless-stopped
 
-  # ── Scheduler (runs artisan schedule:work, e.g. carts:purge-abandoned) ──
+  # Scheduler (runs artisan schedule:work, e.g. carts:purge-abandoned)
   scheduler:
     image: ghcr.io/charlesgauthier1999/gauthierfitness-backend:${IMAGE_TAG:-latest}
     container_name: gf_scheduler
