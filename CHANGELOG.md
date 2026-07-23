@@ -4,6 +4,32 @@ All notable changes to the GauthierFitness infrastructure are documented here.
 
 Format inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [v1.1.4] - 2026-07-23
+
+### Added
+
+- Backfilled the missing changelog entry for v1.1.3.
+
+## [v1.1.3] - 2026-07-22
+
+### Added
+
+- E2E coverage for the guest checkout journey (Cypress): confirms `/checkout` stays accessible without
+  authentication and completes up to the Stripe payment form.
+
+### Changed
+
+- Updated the GitHub Actions used in CI/CD, grouped by Dependabot (`actions/setup-node` v6 → v7).
+- Cosmetic cleanup across workflows, scripts, Nginx configs, and Cypress specs: removed Unicode comment
+  separators, translated remaining French step names/comments to English, normalized array-bracket spacing.
+  No functional change.
+- README: documented the `scheduler` service in the `docker-compose.yml` component table.
+
+### Fixed
+
+- `restore-db-test.sh`: the S3 backup lookup filtered by `$TARGET` (staging/prod) instead of `$HOST_FILTER`
+  (server hostname), so the log message announced hostname filtering but the actual query ignored it.
+
 ## [v1.1.2] - 2026-07-13
 
 ### Fixed
